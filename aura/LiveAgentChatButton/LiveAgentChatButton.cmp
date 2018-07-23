@@ -1,0 +1,42 @@
+<aura:component controller="LiveAgentChatButton" implements="forceCommunity:availableForAllPageTypes" access="global">
+  	<aura:attribute name="organizationId" type="String" required="true"/>
+    <aura:attribute name="deploymentUrl" type="String"  required="true" />
+    <aura:attribute name="endpoint" type="String"  required="true"/>
+    <aura:attribute name="deploymentId" type="String"  required="true"/>
+    <aura:attribute name="chatButtontId" type="String"  required="true"/>
+    <aura:attribute name="onlineText" type="String"  required="true" default="Chat Now"/>
+    <aura:attribute name="offlineText" type="String"  required="true" default="Chat Unavailable"/>
+    <aura:attribute name="isInvalidInput" type="Boolean"  />
+    <aura:attribute name="userSessionData" type="Boolean" default="false"/>
+    <aura:attribute name="caseSession" type="Boolean" required="false" description="Indicate whether to create a case." />
+    <aura:attribute name="caseRecordTypeId" type="String" required="false" description="Type of case record to create." />
+    
+    <aura:attribute name="previousIsLiveAgentOnline" type="Boolean" />
+    <aura:attribute name="isLiveAgentOnline" type="Boolean" default="false"/>
+
+
+    <aura:attribute name="contact" type="Contact"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.init}"/>
+
+    <aura:if isTrue="{!v.isInvalidInput}">
+        <ui:message title="Warning" severity="warning" closable="false">
+           Live Agent Chat Button configuration data is empty.
+        </ui:message>
+    </aura:if>
+        <!-- parameters are ok -->
+        <c:ScriptWrapper paramURL="{!v.deploymentUrl}" />
+        <div id="btnContainer" class="selfServiceContactSupport forceCommunityCreateRecordButton">
+            <div class="ccBtnWrapper">
+
+              <button  aura:id ="btONline" id="btONline" class="uiButton contactSupport ccBtn ccBtnBlue toggle"  onclick="{!c.startChat}">
+                 {!v.onlineText}
+              </button>
+
+              <button  aura:id ="btOFFline"  id="btOFFline" class="uiButton contactSupport ccBtn disabled"  >
+                 {!v.offlineText}
+              </button>
+
+            </div>
+        </div>
+</aura:component>

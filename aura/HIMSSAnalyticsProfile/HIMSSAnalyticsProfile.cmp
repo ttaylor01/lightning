@@ -1,0 +1,8 @@
+<aura:component implements="force:lightningQuickActionWithoutHeader,force:hasRecordId" controller="HIMSSAnalyticsProfileController" >
+    <aura:attribute name="UniqueId" type="String" />
+    <aura:attribute name="recordId" type="String" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <div aura:id="mainContainer">
+        {!v.body}
+    </div>
+</aura:component>
