@@ -1,0 +1,124 @@
+<aura:component controller="CCKnowledgeArticleData" access="global" extends="c:CCDataComponent">
+	<aura:attribute name="knowledgeArticleId" type="Id" />
+    <aura:attribute name="articleType" type="String" />
+    <aura:attribute name="kad" type="CCKnowledgeArticleData" />
+    <aura:attribute name="articleTypeVisibility" type="Boolean" default="false" />
+    <aura:attribute name="knownIssueVisibility" type="Boolean" default="false" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:method name="refresh" action="{!c.doInit}" access="PUBLIC" description="Invokes doInit() method" />
+    <aura:registerEvent name="hideArticleDetailDialog" type="c:CCCancelDialog"/>
+
+    <div aura:id="closedialog" role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+            <div class="slds-modal__header">
+                <lightning:buttonIcon class="slds-modal__close" 
+                                      iconName="utility:close" 
+                                      size="medium" 
+                                      variant="bare-inverse" 
+                                      alternativeText="Close" 
+                                      onclick="{!c.doCancel}"/> 
+                
+                <h3 class="slds-text-heading--medium">Article: {!v.kad.articleNumber}</h3>
+            </div>
+            
+            <div class="slds-modal__content slds-p-around--medium">
+                
+                <div class="slds-panel slds-grid slds-grid--vertical slds-nowrap">
+                    <div class="slds-form--stacked slds-grow slds-scrollable">
+                        <div class="slds-panel__section slds-has-divider--bottom">
+                            <h3 class="slds-text-heading--small slds-m-bottom--medium">{!v.kad.title}</h3>
+                            <p>{!v.kad.summary}</p>
+                            <ul class="slds-list--horizontal slds-has-dividers--left">
+                                <li class="slds-item"><ui:outputDate value="{!v.kad.lastPublishedDate}"/></li>
+                                <li class="slds-item">{!v.kad.articleTypeLabel}</li>
+                            </ul>
+                        </div>
+                        <!-- MAY NEED TO HAVE SEPARATE COMPONENTS HERE FOR EACH ARTICLE TYPE -->
+                        <div class="slds-panel__section">
+                            <div class="{!v.knownIssueVisibility ? 'visible' : 'hidden'}">
+                                <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                    <span class="slds-form-element__label">Date Added</span>
+                                    <div class="slds-form-element__control">
+                                        <span class="slds-form-element__static">{!v.kad.dateAdded}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="{!v.knownIssueVisibility ? 'visible' : 'hidden'}">
+                                <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                    <span class="slds-form-element__label">Date Resolved</span>
+                                    <div class="slds-form-element__control">
+                                        <span class="slds-form-element__static">{!v.kad.dateResolved}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="{!v.knownIssueVisibility ? 'visible' : 'hidden'}">
+                                <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                    <span class="slds-form-element__label">Status</span>
+                                    <div class="slds-form-element__control">
+                                        <span class="slds-form-element__static">{!v.kad.status}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="{!v.knownIssueVisibility ? 'visible' : 'hidden'}">
+                                <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                    <span class="slds-form-element__label">Region</span>
+                                    <div class="slds-form-element__control">
+                                        <span class="slds-form-element__static">{!v.kad.region}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="{!v.knownIssueVisibility ? 'visible' : 'hidden'}">
+                                <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                    <span class="slds-form-element__label">Payer</span>
+                                    <div class="slds-form-element__control">
+                                        <span class="slds-form-element__static">{!v.kad.payer}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="{!v.knownIssueVisibility ? 'visible' : 'hidden'}">
+                                <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                    <span class="slds-form-element__label">Payer ID</span>
+                                    <div class="slds-form-element__control">
+                                        <span class="slds-form-element__static">{!v.kad.payerId}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="{!v.knownIssueVisibility ? 'visible' : 'hidden'}">
+                                <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                    <span class="slds-form-element__label">Issue</span>
+                                    <div class="slds-form-element__control">
+                                        <ui:outputRichText value="{!v.kad.issue}" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="{!v.knownIssueVisibility ? 'visible' : 'hidden'}">
+                                <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                    <span class="slds-form-element__label">Resolution</span>
+                                    <div class="slds-form-element__control">
+                                        <ui:outputRichText value="{!v.kad.resolution}" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="{!v.articleTypeVisibility ? 'visible' : 'hidden'}">
+                                <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                    <span class="slds-form-element__label">Description</span>
+                                    <div class="slds-form-element__control">
+                                        <ui:outputRichText value="{!v.kad.description}" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- / MAY NEED TO HAVE SEPARATE COMPONENTS HERE FOR EACH ARTICLE TYPE -->
+                    </div>
+                </div>
+                
+            </div>
+            
+            <div class="slds-modal__footer">
+                <!-- SOME BUTTONS OR IMAGES FOR TRACKING WHETHER AN ARTICLE WAS HELPFUL -->
+            </div>
+        </div>
+    </div>
+    <div aura:id="closecasebackdrop" class="slds-backdrop slds-backdrop--open"></div>
+
+</aura:component>

@@ -1,0 +1,66 @@
+<aura:component controller="CCFileAttachment" access="global" extends="c:CCDataComponent">
+<!-- http://peterknolle.com/file-upload-lightning-component/ -->
+    <aura:attribute name="recordId" type="String" default="" />
+    <aura:attribute name="MAX_FILE_SIZE" type="Integer" default="750 000" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:registerEvent name="showSpinner" type="c:CCWaiting"/>
+    <aura:registerEvent name="hideSpinner" type="c:CCDoneWaiting"/>
+    <aura:registerEvent name="hideAddAttachmentDialog" type="c:CCCancelDialog"/>
+    <aura:registerEvent name="refreshList" type="c:CCsObjectEvent"/>
+
+    <aura:handler event="aura:systemError" action="{!c.showSystemError}"/>
+
+    <div aura:id="addattachmentdialog" role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+            <div class="slds-modal__header">
+                <lightning:buttonIcon class="slds-modal__close" 
+                                      iconName="utility:close" 
+                                      size="medium" 
+                                      variant="bare-inverse" 
+                                      alternativeText="Close" 
+                                      onclick="{!c.doCancel}"/> 
+                
+                <h2 id="header43" class="slds-text-heading--medium">Add Attachment</h2>
+            </div>
+            <div class="slds-modal__content slds-p-around--medium">
+                
+                <div class="slds-panel">
+                    <!-- FORM STACKED -->
+                    <div class="slds-form--stacked">
+                        <div class="slds-panel__section">
+                            <h5 class="slds-text-heading--small slds-m-bottom--medium">Select File</h5>
+                            <div class="slds-grid slds-grid--pull-padded slds-wrap">
+                                <div class="slds-form-element">
+                                    <span class="slds-form-element__label" id="file-selector-id">Attachment</span>
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-file-selector slds-file-selector--files">
+                                            <div class="slds-file-selector__dropzone">
+                                                <input type="file" aura:id="file" class="slds-file-selector__input slds-assistive-text" id="file-upload-input-01" aria-describedby="file-selector-id"
+                                                       onchange="{!c.handleFilesChange}" />
+                                                <label class="slds-file-selector__body" for="file-upload-input-01">
+                                                    <span class="slds-file-selector__button slds-button slds-button--neutral">
+                                                        <lightning:icon iconName="utility:upload" size="x-small" alternativeText="Upload" class="slds-icon slds-icon--hint"/>
+                                                        Upload File
+                                                    </span>
+                                                    <span aura:id="fileTitle" id="fileTitle" class="slds-file-selector__text slds-medium-show"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- / FORM STACKED -->
+                </div>
+
+            </div>
+            <div class="slds-modal__footer">
+                <lightning:button label="Cancel" aura:id="btnCancel" variant="neutral" onclick="{!c.doCancel}" />
+                <lightning:button label="Save" aura:id="btnSave" variant="brand" onclick="{!c.doSave}" />
+            </div>
+        </div>
+    </div>
+    <div aura:id="addattachmentbackdrop" class="slds-backdrop slds-backdrop--open"></div>
+
+</aura:component>

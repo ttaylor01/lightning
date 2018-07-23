@@ -1,0 +1,33 @@
+<aura:component controller="CCKnowledgeArticleData" access="global" extends="c:CCDataComponent">
+    <aura:attribute name="searchStr" type="String" default="" />
+    <aura:attribute name="numArticles" type="String" default="6" />
+    <aura:attribute name="kavs" type="CCKnowledgeArticleData[]" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:method name="refresh" action="{!c.doInit}" access="PUBLIC" description="Re-invokes doInit() method" />
+    <aura:method name="clear" action="{!c.clear}" access="PUBLIC" description="Invokes clear() method" />
+	<!-- Event handlers -->
+    <aura:handler name="hideArticleDetailDialog" event="c:CCCancelDialog" action="{!c.hideArticleDetailDialog}"/>
+
+<div aura:id="articleModal" class="hide-modal">
+    <c:CCArticleDetail aura:id="articleDetailCmp" knowledgeArticleId="" articleType=""/>
+</div>
+
+    <div>
+        <ul>
+            <aura:iteration items="{!v.kavs}" var="kav" indexVar="idx">
+                <li class="slds-item slds-m-top--small">
+                    <div class="slds-tile" data-row="{!idx}" data-pk="{!kav.knowledgeArticleId}" onclick="{!c.onArticleClick}">
+                        <h3 class="slds-truncate" title="{!kav.title}"><a href="javascript:void(0);">{!kav.title}</a></h3>
+                        <div class="slds-tile__detail slds-text-body--small">
+                            <ul class="slds-list--horizontal slds-has-dividers--left">
+                                <li class="slds-item"><ui:outputDate value="{!kav.lastPublishedDate}"/></li>
+                                <li class="slds-item">{!kav.articleTypeLabel}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+            </aura:iteration>
+        </ul>
+    </div>
+
+</aura:component>

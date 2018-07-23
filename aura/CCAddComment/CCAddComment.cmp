@@ -1,0 +1,49 @@
+<aura:component controller="CCCaseComment" access="global" extends="c:CCDataComponent">
+	<aura:attribute name="recordId" type="String" default="" />
+	<aura:attribute name="body" type="String" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <aura:registerEvent name="hideAddCommentDialog" type="c:CCCancelDialog"/>
+    <aura:registerEvent name="showSpinner" type="c:CCWaiting"/>
+    <aura:registerEvent name="hideSpinner" type="c:CCDoneWaiting"/>
+
+    <div aura:id="addcommentdialog" role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+            <div class="slds-modal__header">
+                <lightning:buttonIcon class="slds-modal__close" 
+                                      iconName="utility:close" 
+                                      size="medium" 
+                                      variant="bare-inverse" 
+                                      alternativeText="Close" 
+                                      onclick="{!c.doCancel}"/> 
+                
+                <h2 id="header43" class="slds-text-heading--medium">Add Comment</h2>
+            </div>
+            <div class="slds-modal__content slds-p-around--medium">
+                
+                <div class="slds-panel">
+                    <!-- FORM STACKED -->
+                    <div class="slds-form--stacked">
+                        <div class="slds-panel__section">
+                            <h5 class="slds-text-heading--small slds-m-bottom--medium">Comment Details</h5>
+                            <div class="slds-grid slds-grid--pull-padded slds-wrap">
+                                <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                                    <lightning:textarea aura:id="comment" name="comment" required="true" label="Comment" value="{!v.body}" 
+                                                        messageWhenValueMissing="This field is required."/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- / FORM STACKED -->
+                </div>
+
+            </div>
+            <div class="slds-modal__footer">
+                <lightning:button label="Cancel" aura:id="btnCancel" variant="neutral" onclick="{!c.doCancel}" />
+                <lightning:button label="Save" aura:id="btnSave" variant="brand" onclick="{!c.doSave}" />
+            </div>
+        </div>
+    </div>
+    <div aura:id="addcommentbackdrop" class="slds-backdrop slds-backdrop--open"></div>
+
+</aura:component>
