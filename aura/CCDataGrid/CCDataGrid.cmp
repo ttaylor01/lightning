@@ -1,0 +1,23 @@
+<aura:component >
+    <aura:attribute name="cols" 
+                    type="Object[]" 
+                    access="PRIVATE" description="The grid columns."/>   
+    
+    <aura:attribute name="rows" 
+                    type="Object[]" 
+                    access="PRIVATE" 
+                    description="The grid row data."/>   
+    
+    <aura:handler name="init" 
+                  value="{!this}" 
+                  action="{!c.doInit}"/>
+    
+    <aura:method name="refresh" 
+                 action="{!c.doInit}" 
+                 access="PUBLIC"
+                 description="Re-parse body components " />
+    
+    <c:CCDataGridTable aura:id="dataGridTableComponent" rows="{!v.rows}" 
+                       cols="{!v.cols}" />
+    
+</aura:component>

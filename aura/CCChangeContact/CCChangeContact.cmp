@@ -1,0 +1,75 @@
+<aura:component controller="CCCaseDetail" access="global" extends="c:CCDataComponent">
+	<aura:attribute name="cs" type="Case" default="{'sobjectType':'Case'}" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:attribute name="recordId" type="Id" description="selected Contact record Id" />
+    <!-- Events -->
+    <aura:registerEvent name="hideChangeContactDialog" type="c:CCCancelDialog"/>
+    <!-- Event handlers -->
+    <aura:handler name="updateLookupIdEvent" event="c:CCUpdateLookupId" action="{!c.handleContactIdUpdate}"/>
+    <aura:handler name="clearLookupIdEvent" event="c:CCClearLookupId" action="{!c.handleContactIdClear}"/>
+
+    <div aura:id="changecontactdialog" role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+            <div class="slds-modal__header">
+                <lightning:buttonIcon class="slds-modal__close" 
+                                      iconName="utility:close" 
+                                      size="medium" 
+                                      variant="bare-inverse" 
+                                      alternativeText="Close" 
+                                      onclick="{!c.doCancel}"/> 
+                
+                <h2 id="header43" class="slds-text-heading--medium">Change Contact</h2>
+            </div>
+            <div class="slds-modal__content slds-p-around--medium" style="height : 500px">
+                
+                <div class="slds-panel">
+                    <!-- FORM INLINE -->
+                    <div class="slds-form--inline">
+                        <div class="slds-panel__section">
+                            <div class="slds-grid slds-grid--pull-padded slds-wrap">
+                                <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                                    <span class="slds-form-element__label">Subject</span>
+                                    <div class="slds-form-element__control">
+                                        <span class="slds-form-element__static">{!v.cs.Subject}</span>
+                                    </div>
+                                </div>
+                                <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                                    <span class="slds-form-element__label">Current Contact</span>
+                                    <div class="slds-form-element__control">
+                                        <span class="slds-form-element__static">{!v.cs.Contact.Name}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- / FORM INLINE -->
+
+                    <!-- FORM STACKED -->
+                    <div class="slds-form--stacked">
+                        <div class="slds-panel__section">
+                            <h5 class="slds-text-heading--small slds-m-bottom--medium">Contact Lookup by Name</h5>
+                            <div class="slds-grid slds-grid--pull-padded slds-wrap">
+
+                                <c:CCLookupSObject aura:id="lookupSObjComponent" label="Contact" pluralLabel="Contacts" sObjectAPIName="Contact"
+                                                   listIconSVGPath="standard:contact"
+                                                   listIconClass="slds-icon-standard-contact"
+                                                   recordId="{!v.recordId}"
+                                                   />
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- / FORM STACKED -->
+
+                </div>
+
+            </div>
+            <div class="slds-modal__footer">
+                <lightning:button label="Cancel" aura:id="btnCancelCloseCase" variant="neutral" onclick="{!c.doCancel}" />
+                <lightning:button label="Save" aura:id="btnSaveCloseCase" variant="brand" onclick="{!c.doSave}" />
+            </div>
+        </div>
+    </div>
+    <div aura:id="changecontactbackdrop" class="slds-backdrop slds-backdrop--open"></div>
+
+</aura:component>

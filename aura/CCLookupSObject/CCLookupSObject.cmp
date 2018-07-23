@@ -1,0 +1,85 @@
+<aura:component controller="CCLookupSObjectController" >
+    <!-- See https://sfdcknowledgebank.wordpress.com/2016/06/16/sobject-lookup-lightning-component/ -->
+    <!-- Attributes -->
+    <aura:attribute name="sObjectAPIName" type="String" required="true"
+        description="The API name of the SObject to search" />
+    <aura:attribute name="label" type="String" required="true"
+        description="The label to assign to the lookup, eg: Account" />
+    <aura:attribute name="pluralLabel" type="String" required="true"
+        description="The plural label to assign to the lookup, eg: Accounts" />
+    <aura:attribute name="listIconSVGPath" type="String" default="standard:contact"
+        description="The static resource path to the svg icon to use." />
+    <aura:attribute name="listIconClass" type="String" default="slds-icon-standard-contact"
+        description="The SLDS class to use for the icon." />
+    <aura:attribute name="searchString" type="String"
+        description="The search string to find." />
+    <aura:attribute name="matchingResult" type="CCLookupSObjectController.SearchResult[]"
+                    description="The resulting matches returned by the Apex controller." />
+    <aura:attribute name="recordId" type="Id"
+                    description="selected soBject record Id" />
+    <aura:attribute name="fieldAPIName" type="String" default="Id"
+        description="The API name of the SObject Field being populated from the calling component" />
+    <aura:attribute name="customFilter" type="String" required="false" default=""
+        description="additional where clause filter to pass to server, eg: AccountId = '001...'" />
+    <aura:attribute name="lookupError" type="Boolean" default="false" />
+    <aura:attribute name="errorMsg" type="String" required="false" default="You must set a value" />
+    
+
+    <!-- Events -->
+    <aura:registerEvent name="updateLookupIdEvent" type="c:CCUpdateLookupId"/>
+    <aura:registerEvent name="clearLookupIdEvent" type="c:CCClearLookupId"/>
+
+    <aura:method access="public" name="setError" action="{!c.setError}" >
+        <aura:attribute name="msg" type="String" />
+    </aura:method>
+    <aura:method access="public" name="clearError" action="{!c.clearError}" />
+    
+    <!-- Lookup Markup : See https://www.lightningdesignsystem.com/components/lookups -->
+        <!-- This is the Input form markup -->
+        <div aura:id="lookup-div" class="slds-form-element slds-lookup slds-is-open" data-select="single" data-typeahead="true">
+            <label class="slds-form-element__label" for="lookup">{!v.label}</label>
+            <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--right">
+                <lightning:icon iconName="utility:search" size="x-small" alternativeText="Search" class="slds-input__icon"/>
+                <!-- This markup is for when an item is currently selected -->
+                <div aura:id="lookup-pill" class="slds-pill-container slds-hide">
+                    <span class="slds-pill slds-pill--bare">
+                        <span class="slds-pill__label">
+                            <lightning:icon iconName="{!v.listIconSVGPath}" size="small" class="{!'slds-icon ' + v.listIconClass + ' slds-icon--small'}"/>
+                            {!v.searchString}
+                        </span>
+                        <lightning:buttonIcon iconName="utility:close" size="small" variant="bare" alternativeText="Close" onclick="{!c.clear}"/>
+                        <span class="slds-assistive-text">Remove</span>
+                    </span>
+                </div>
+                <!-- This markup is for when searching for a string -->
+                <ui:inputText aura:id="lookup" value="{!v.searchString}" placeholder="search keyword..." class="slds-input" updateOn="keyup" keyup="{!c.search}" />
+                <div class="{!v.lookupError ? 'slds-form-element__help slds-text-color_error visible' : 'slds-form-element__help slds-text-color_error hidden'}">
+                    {!v.errorMsg}
+                </div>
+            </div>
+            
+            <!-- This is the lookup list markup. Initially it's hidden -->
+            <div aura:id="lookuplist" class="slds-hide">
+                <div class="slds-lookup__menu" role="listbox">
+                    <div class="slds-lookup__item" role="option">
+                        <button class="slds-button">
+                            <lightning:icon iconName="utility:search" size="small" alternativeText="Search" />
+                            &quot;{!v.searchString}&quot; in {!v.pluralLabel}
+                        </button>
+                    </div>
+                    <ul aura:id="lookuplist-items" class="slds-lookup__list" role="presentation">
+                        <aura:iteration items="{!v.matchingResult}" var="match">
+                            <li class="slds-lookup__item">
+                                <a id="{!globalId + '_id_' + match.SObjectId}" href="javascript:void(0);" role="option" onclick="{!c.select}">
+                                    <lightning:icon iconName="{!v.listIconSVGPath}" size="small" class="{!'slds-icon ' + v.listIconClass + ' slds-icon--small'}"/>
+                                    {!match.SObjectLabel}
+                                </a>
+                            </li>
+                        </aura:iteration>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- / Lookup Markup -->
+ 
+</aura:component>

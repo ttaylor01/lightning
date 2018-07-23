@@ -1,0 +1,43 @@
+<aura:component >
+
+    <aura:attribute name="cols" 
+                    type="Object[]" 
+                    access="GLOBAL" 
+                    description="The grid columns."/> 
+    
+    <aura:attribute name="rows" 
+                    type="Object[]" 
+                    access="GLOBAL" 
+                    description="The grid row data."/>
+
+    <aura:registerEvent name="rowclick"  
+                        type="c:CCDataGridRowClick"/>
+
+    <!-- slds-max-medium-tableDASHDASHstacked -->
+    <table class="slds-table slds-table--bordered ">
+        <thead>
+            <tr class="slds-text-heading--label">
+                <aura:iteration items="{!v.cols}" var="col" indexVar="idx">
+                    <th scope="col" class="{!col.class}">
+                        <a href="javascript:void(0);" class="slds-th__action slds-text-link--reset" tabindex="0">
+                            <span class="slds-assistive-text">Sort </span>
+                            <span class="slds-truncate" title="{!col.label}">{!col.label}</span>
+                            <lightning:icon iconName="utility:arrowdown" size="x-small" alternativeText="Sort" class="slds-icon slds-icon--x-small slds-icon-text-default slds-is-sortable__icon"/>
+                        </a>
+                    </th>
+                </aura:iteration>
+            </tr>
+        </thead>
+        <tbody >
+            <aura:iteration items="{!v.rows}" var="row" indexVar="idx">
+                <tr class="slds-hint-parent" data-row="{!idx}" data-pk="{!row.pk}" onclick="{!c.onRowClick}" >
+                    <aura:iteration items="{!row.data}" var="colData">
+                        <td class="{!colData.class}"  data-label="{!colData.label}">
+                            <span class="slds-truncate">{!colData.data}</span>
+                        </td>
+                    </aura:iteration>
+                </tr>
+            </aura:iteration>
+        </tbody>
+    </table>
+</aura:component>

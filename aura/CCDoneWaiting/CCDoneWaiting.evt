@@ -1,0 +1,1 @@
+<aura:event type="COMPONENT" description="Notify when client is done waiting for response" />

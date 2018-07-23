@@ -1,0 +1,40 @@
+.THIS .hidden {
+    display: none;
+}
+.THIS .hide-button {
+    display: none;
+}
+/*
+* Added hide-error-message class to apply to slds-form-element__help class
+* for the DIV that is added by Salesforce when lightning:input component has invalid input.
+* This is intended to hide the error message when I want to clear the validation dynamically.
+* Salesforce should provide something to do this for me on lightning:input components
+* similarly to how the ui:input components do with settings the errors attribute.
+*/
+.THIS .hide-error-message > .slds-form-element__help {
+    display: none;
+}
+.THIS .uiMultiInputSelect {
+    height: 100px;
+}
+/*
+ * FOLLOWING DOESN't WORK
+ */
+.THIS .slds-checkbox input[type=checkbox] {
+    outline: 2px solid #F00 !important;
+    border-style: solid !important;
+    border-color: #c00 !important;
+    border-width: 2px !important;
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+}
+/*
+ * FLOAT LABEL TO RIGHT OF CHECKBOX, set CLASS TO
+ */
+.THIS .myCheckbox {
+    display: inline-block;
+    float: left;
+    margin-right: 10px;
+}

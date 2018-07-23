@@ -1,0 +1,293 @@
+<aura:component controller="CCChangeRequestDetail" access="global" extends="c:CCPayerReviewUtility">
+    <aura:attribute name="recordId" type="String" default="" />
+    <aura:attribute name="viewSelect" type="String" default="Open" />
+	<aura:attribute name="cs" type="Case" default="{'sobjectType':'Case'}" />
+    <aura:attribute name="archiveVisibility" type="Boolean" default="false" />
+    <aura:attribute name="openVisibility" type="Boolean" default="false" />
+    <aura:attribute name="reopenVisibility" type="Boolean" default="false" />
+    <aura:attribute name="otherVisibility" type="Boolean" default="true" />
+    <aura:attribute name="otherTransactionVisibility" type="Boolean" default="false" />
+    <aura:attribute name="reportingneedsVisibility" type="Boolean" default="false" />
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <!-- Event handlers -->
+    <aura:handler name="hideChangeCaseStatusDialog" event="c:CCCancelDialog" action="{!c.hideChangeCaseStatusDialog}"/>
+    <aura:handler name="hideChangeContactDialog" event="c:CCCancelDialog" action="{!c.hideChangeContactDialog}"/>
+    <aura:registerEvent name="goToTarget" type="c:CCsObjectEvent"/>
+
+    <aura:handler name="showSpinner" event="c:CCWaiting" action="{!c.doWait}"/>
+    <aura:handler name="hideSpinner" event="c:CCDoneWaiting" action="{!c.stopWait}"/>
+
+<div aura:id="reopencasecmp" class="hide-modal">
+    <c:CCChangeCaseStatus aura:id="reopenCaseComponent" cs="{!v.cs}" label="Re-open Ticket" status="Re-opened"/>
+</div>
+<div aura:id="changecontactcmp" class="hide-modal">
+    <c:CCChangeContact aura:id="changeContactComponent" cs="{!v.cs}" />
+</div>
+
+    <lightning:spinner aura:id="spinner" variant="brand" size="large" class="slds-hide" alternativeText="Please wait while processing request..."/>
+
+    <!-- PAGE HEADER -->
+    <div class="slds-page-header">
+        <!-- PAGE HEADER TOP ROW -->
+        <div class="slds-grid slds-wrap">
+            <!-- PAGE HEADER / ROW 1 / COLUMN 1 -->
+                <div class="slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+<!--
+            <div class="slds-col slds-has-flexi-truncate">
+-->
+                <!-- HEADING AREA -->
+                <!-- MEDIA OBJECT = FIGURE + BODY -->
+                <div class="slds-media slds-no-space slds-grow">
+                    <div class="slds-media__figure">
+                        <lightning:icon iconName="standard:note" alternativeText="Ticket" class="slds-icon slds-icon-standard-case"/>
+                    </div>
+                    <div class="slds-media__body slds-media--center">
+                        <p class="slds-text-title--caps slds-line-height--reset">{!v.cs.Source__c} Ticket</p>
+                        <h2 class="slds-page-header__title slds-m-right--small slds-align-middle slds-truncate" title="Ticket Number">{!v.cs.CaseNumber}</h2>
+                        <a onclick="{!c.backToList}" href="javascript:void(0);" class="slds-text-link--reset"><span class="slds-text-link">&laquo; Back to List</span></a>
+                    </div>
+                </div>
+                <!-- / MEDIA OBJECT -->
+                <!-- HEADING AREA -->
+            </div>
+            <!-- / PAGE HEADER / ROW 1 / COLUMN 1 -->
+            <!-- PAGE HEADER / ROW 1 / COLUMN 2 -->
+                <div class="slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+<!--
+            <div class="slds-col slds-no-flex slds-grid slds-align-top">
+-->
+                <div class="slds-button-group slds-float_right" role="group">
+                    <lightning:button label="Edit" class="{!(v.openVisibility)?'':'hide-button'}" aura:id="btnEdit" disabled="false" variant="neutral" onclick="{!c.setEditMode}" />
+                    <lightning:button label="Archive Ticket" class="{!(v.archiveVisibility)?'':'hide-button'}" aura:id="btnArchiveCase" disabled="false" variant="neutral" onclick="{!c.doArchiveCase}" />
+                    <lightning:button label="Reopen Ticket" class="{!(v.reopenVisibility)?'':'hide-button'}" aura:id="btnReopenCase" disabled="false" variant="neutral" onclick="{!c.showReopenCaseDialog}" />
+                    <lightning:button label="Change Contact" class="{!(v.openVisibility)?'':'hide-button'}" aura:id="btnChangeContact" disabled="false" variant="neutral" onclick="{!c.showChangeContactDialog}" />
+                    <lightning:button label="Save" class="hide-button" name="btnSave" aura:id="btnSave" disabled="false" variant="brand" onclick="{!c.doSave}" />
+                    <lightning:button label="Cancel" class="hide-button" name="btnCancel" aura:id="btnCancel" disabled="false" variant="neutral" onclick="{!c.doCancel}" />
+                </div>
+            </div>
+            <!-- / PAGE HEADER / ROW 1 / COLUMN 2 -->
+        </div>
+        <!-- / PAGE HEADER TOP ROW -->
+    </div>
+    <!-- / PAGE HEADER -->
+
+    <!-- Case Record Detail -->
+    <div class="slds-panel">
+        <!-- FORM INLINE -->
+        <div class="slds-form--inline">
+	        <!-- PANEL BOILERPLATE STUFF -->
+            <div class="slds-panel__section slds-has-divider--bottom">
+                <div class="slds-grid slds-grid--pull-padded">
+                    <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12">
+                        <span class="slds-form-element__label">Contact Name</span>
+                        <div class="slds-form-element__control">
+                            <span class="slds-form-element__static">{!v.cs.Contact.Name}</span>
+                        </div>
+                    </div>
+                    <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12">
+                        <span class="slds-form-element__label">Availity Customer ID</span>
+                        <div class="slds-form-element__control">
+                            <span class="slds-form-element__static">{!v.cs.CID_Identifier__c}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-grid slds-grid--pull-padded">
+                    <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                        <span class="slds-form-element__label">Status</span>
+                        <div class="slds-form-element__control">
+                            <span class="slds-form-element__static">{!v.cs.Status}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-grid slds-grid--pull-padded">
+                    <div aura:id="outputAlternateEmail" class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12">
+                        <button class="slds-button slds-float--right slds-button--icon slds-button--icon-small" title="Edit this Field" onclick="{!c.setEditMode}">
+                            <lightning:icon iconName="utility:edit" size="x-small" alternativeText="Edit" class="slds-button__icon slds-button__icon--hint"/>
+                            <span class="slds-assistive-text">Edit this Field</span>
+                        </button>
+                        <span class="slds-form-element__label">Alternate Contact Email</span>
+                        <div class="slds-form-element__control">
+                            <span class="slds-form-element__static">{!v.cs.Alternate_Email__c}</span>
+                        </div>
+                    </div>
+                    <div aura:id="inputAlternateEmail" class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12 hide-component">
+                        <lightning:input aura:id="alternateemail" type="email" label="Alternate Contact Email" name="alternateemail" value="{!v.cs.Alternate_Email__c}"
+                                         messageWhenTypeMismatch="Please enter a valid email format."/>
+                    </div>
+                    <div aura:id="outputAlternateEmail2" class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12">
+                        <button class="slds-button slds-float--right slds-button--icon slds-button--icon-small" title="Edit this Field" onclick="{!c.setEditMode}">
+                            <lightning:icon iconName="utility:edit" size="x-small" alternativeText="Edit" class="slds-button__icon slds-button__icon--hint"/>
+                            <span class="slds-assistive-text">Edit this Field</span>
+                        </button>
+                        <span class="slds-form-element__label">Alternate Contact Email 2</span>
+                        <div class="slds-form-element__control">
+                            <span class="slds-form-element__static">{!v.cs.Alternate_Email_2__c}</span>
+                        </div>
+                    </div>
+                        <div aura:id="inputAlternateEmail2" class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12 hide-component">
+                            <lightning:input aura:id="alternateemail2" type="email" label="Alternate Contact Email 2" name="alternateemail2" value="{!v.cs.Alternate_Email_2__c}" 
+                                             messageWhenTypeMismatch="Please enter a valid email format."/>
+                        </div>
+                </div>
+            </div>
+            <!-- / PANEL BOILERPLATE STUFF -->
+
+	        <!-- PANEL Case Reason -->
+            <div >
+                <div class="slds-panel__section slds-has-divider--bottom">
+                    <h2 class="slds-text-heading--small slds-m-bottom--medium">Request Information</h2>
+                    <div class="slds-grid slds-grid--pull-padded">
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12">
+                            <span class="slds-form-element__label">Requested Priority</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.cs.Requestor_Priority__c}</span>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12">
+                            <span class="slds-form-element__label">Requested Production Date</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.cs.Requested_Production_Date__c}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-grid slds-grid--pull-padded">
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12">
+                            <span class="slds-form-element__label">Controlled Deployment/Pilot Request</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.cs.Controlled_Deployment_Pilot_Requested__c}</span>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12">
+                            <span class="slds-form-element__label">Release Communication Required</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.cs.Release_communication_required__c}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-grid slds-grid--pull-padded slds-wrap">
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                            <span class="slds-form-element__label">Region</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.cs.Region__c}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- / PANEL Case Reason -->
+
+	        <!-- PANEL Other Info -->
+            <div aura:id="otherpanel" class="{!v.otherVisibility ? 'visible' : 'hidden'}">
+                <div class="slds-panel__section slds-has-divider--bottom">
+                    <h2 class="slds-text-heading--small slds-m-bottom--medium">Additional Information</h2>
+                    <div class="slds-grid slds-grid--pull-padded">
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12">
+                            <div class="slds-form-element__control">
+                                <span class="slds-checkbox">
+                                    <input type="checkbox" checked="{!v.cs.Mandate__c}" name="mandate" id="mandate" disabled="true" />
+                                    <label class="slds-checkbox__label" for="mandate">
+                                        <span class="slds-checkbox--faux"></span>
+                                        <span class="slds-form-element__label">Mandate?</span>
+                                    </label>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12">
+                            <div class="slds-form-element__control">
+                                <span class="slds-checkbox">
+                                    <input type="checkbox" checked="{!v.cs.Is_Special_Reporting_Needed__c}" name="specialreporting" id="specialreporting" disabled="true" />
+                                    <label class="slds-checkbox__label" for="specialreporting">
+                                        <span class="slds-checkbox--faux"></span>
+                                        <span class="slds-form-element__label">Is Special Reporting Needed?</span>
+                                    </label>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="{!v.reportingneedsVisibility ? 'visible' : 'hidden'}">
+                        <div class="slds-grid slds-grid--pull-padded slds-wrap">
+                            <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                                <span class="slds-form-element__label">Special Reporting Needs</span>
+                                <div class="slds-form-element__control">
+                                    <span class="slds-form-element__static">{!v.cs.Special_Reporting_Needs__c}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-grid slds-grid--pull-padded slds-wrap">
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                            <span class="slds-form-element__label">System(s) Impacted</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.cs.System_Impacted__c}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slds-grid slds-grid--pull-padded">
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12">
+                            <span class="slds-form-element__label">Transaction</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.cs.Transaction__c}</span>
+                            </div>
+                        </div>
+                        <div class="{!v.otherTransactionVisibility ? 'slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12 visible' : 'slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12 hidden'}">
+                            <span class="slds-form-element__label">Other Transaction</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.cs.Other_Transaction__c}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-grid slds-grid--pull-padded slds-wrap">
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                            <span class="slds-form-element__label">Justification for Request</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.cs.Justification_for_Request__c}</span>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                            <span class="slds-form-element__label">Impact if Date Not Met</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.cs.Impact_on_Payer_if_Date_is_Not_Met__c}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- / PANEL Other Info -->
+
+	        <!-- PANEL Case Details -->
+            <div class="slds-panel__section">
+                <h2 class="slds-text-heading--small slds-m-bottom--medium">Details</h2>
+                <div class="slds-grid slds-grid--pull-padded slds-wrap">
+                    <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                        <span class="slds-form-element__label">Subject</span>
+                        <div class="slds-form-element__control">
+                            <span class="slds-form-element__static">{!v.cs.Subject}</span>
+                        </div>
+                    </div>
+                    <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                        <span class="slds-form-element__label">Description</span>
+                        <div class="slds-form-element__control">
+                            <span class="slds-form-element__static">{!v.cs.Description}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- / PANEL Case Details -->
+
+        </div>
+        <!-- / FORM INLINE -->
+    </div>
+    <!-- / Case Record Detail -->
+
+    <!-- RELATED LIST CARDS-->
+    <!-- COMMENT section -->
+    <div aura:id="caseCommentListCmp"></div>
+    <!-- / COMMENT section -->
+    <!-- ATTACHMENT section -->
+    <div aura:id="fileAttachmentListCmp"></div>
+    <!-- / ATTACHMENT section -->
+    <!-- / RELATED LIST CARDS-->
+
+</aura:component>

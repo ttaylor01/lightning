@@ -1,0 +1,12 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global" >
+    <aura:attribute name="loginURL" type="String" default=""/>
+    <div id="elegantPanel">
+        <h3>Log off Successful</h3>
+        <p>Thank you for contacting support.</p>
+        <div class="buttons">
+            <div class="arrghRight">
+                <a href="{!v.loginURL}">Log in again</a>
+            </div>
+        </div>
+    </div>		
+</aura:component>

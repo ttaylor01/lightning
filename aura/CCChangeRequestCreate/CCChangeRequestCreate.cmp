@@ -1,0 +1,247 @@
+<aura:component controller="CCChangeRequestDetail" access="global" extends="c:CCPayerReviewUtility">
+    <aura:attribute name="recordId" type="String" default="" />
+    <aura:attribute name="viewSelect" type="String" default="Open" />
+	<aura:attribute name="cs" type="Case" 
+                    default="{'sobjectType':'Case','RecordTypeId': '012600000005B90AAE'}"/>
+    <aura:attribute name="otherVisibility" type="Boolean" default="true" />
+    <aura:attribute name="otherTransactionVisibility" type="Boolean" default="false" />
+    <aura:attribute name="reportingneedsVisibility" type="Boolean" default="false" />
+    <aura:attribute name="crformattachedVisibility" type="Boolean" default="false" />
+    <aura:attribute name="objInfo" type="string" default="Case" description="store object Info." />
+    <aura:attribute name="regionList" type="String[]"/>
+
+    <aura:attribute name="searchVal" type="String" default="" />
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:registerEvent name="goToTarget" type="c:CCsObjectEvent"/>
+
+    <lightning:spinner aura:id="spinner" variant="brand" size="large" alternativeText="Please wait while processing request..."/>
+
+    <!-- PAGE HEADER -->
+    <div class="slds-page-header">
+        <!-- PAGE HEADER TOP ROW -->
+        <div class="slds-grid">
+            <!-- PAGE HEADER / ROW 1 / COLUMN 1 -->
+            <div class="slds-col slds-has-flexi-truncate">
+                <!-- HEADING AREA -->
+                <!-- MEDIA OBJECT = FIGURE + BODY -->
+                <div class="slds-media slds-no-space slds-grow">
+                    <div class="slds-media__figure">
+                        <lightning:icon iconName="standard:note" alternativeText="Ticket" class="slds-icon slds-icon-standard-case"/>
+                    </div>
+                    <div class="slds-media__body slds-media--center">
+                        <p class="slds-text-title--caps slds-line-height--reset">Ticket</p>
+                        <h2 class="slds-page-header__title slds-m-right--small slds-align-middle slds-truncate" title="Ticket Number">New Change Request Ticket</h2>
+                    </div>
+                </div>
+                <!-- / MEDIA OBJECT -->
+                <!-- HEADING AREA -->
+            </div>
+            <!-- / PAGE HEADER / ROW 1 / COLUMN 1 -->
+            <!-- PAGE HEADER / ROW 1 / COLUMN 2 -->
+            <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                <div class="slds-button-group" role="group">
+                    <lightning:button label="Save" name="btnSave" aura:id="btnSave" disabled="false" variant="brand" onclick="{!c.doSave}" />
+                    <lightning:button label="Cancel" name="btnCancel" aura:id="btnCancel" disabled="false" variant="neutral" onclick="{!c.doCancel}" />
+                </div>
+            </div>
+            <!-- / PAGE HEADER / ROW 1 / COLUMN 2 -->
+        </div>
+        <!-- / PAGE HEADER TOP ROW -->
+    </div>
+    <!-- / PAGE HEADER -->
+
+    <!-- GRID -->
+    <div class="slds-grid slds-m-top--large">
+        <!-- MAIN COL -->
+        <div class="myForm slds-col slds-p-horizontal--small slds-col--rule-right ">
+
+            <!-- FIELDSET BOILERPLATE STUFF -->
+            <fieldset class="slds-form--compound slds-has-divider--bottom-space">
+                <div class="slds-form-element__group">
+                    <div class="slds-form-element__row">
+                        <div class="slds-form-element slds-size--1-of-2">
+                            <label class="slds-form-element__label">Contact Name</label>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.cs.Contact.Name}</span>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-size--1-of-2">
+                            <label class="slds-form-element__label">Availity Customer ID</label>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.cs.CID_Identifier__c}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-form-element__row">
+                        <lightning:input class="slds-size--1-of-2" aura:id="alternateemail" type="email" label="Alternate Contact Email" name="alternateemail" value="{!v.cs.Alternate_Email__c}"
+                                         messageWhenTypeMismatch="Please enter a valid email format."/>
+                        <lightning:input class="slds-size--1-of-2" aura:id="alternateemail2" type="email" label="Alternate Contact Email 2" name="alternateemail2" value="{!v.cs.Alternate_Email_2__c}" 
+                                         messageWhenTypeMismatch="Please enter a valid email format."/>
+                    </div>
+                </div> <!-- / GROUP -->
+            </fieldset>
+            <!-- / FIELDSET BOILERPLATE STUFF -->
+
+            <!-- FIELDSET Request Information -->
+            <fieldset class="slds-form--compound slds-has-divider--bottom-space">
+                <legend class="slds-form-element__label slds-text-title--caps">Request Information</legend>
+                <div class="slds-form-element__group">
+                    <div class="slds-form-element__row">
+                        <div class="slds-form-element slds-size--1-of-2">
+                            <label class="slds-form-element__label"><abbr class="slds-required" title="required">*</abbr>Requested Priority</label>
+                            <div class="slds-form-element__control">
+                                <ui:inputSelect aura:id="requestorpriority" class="slds-select" value="{!v.cs.Requestor_Priority__c}" required="true" />
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-size--1-of-2">
+                            <label class="slds-form-element__label"><abbr class="slds-required" title="required">*</abbr>Requested Production Date</label>
+                            <div class="slds-form-element__control">
+                                <ui:inputDate class="slds-input" aura:id="requestedproductiondate" value="{!v.cs.Requested_Production_Date__c}"
+                                              format="M/d/yyyy" displayDatePicker="true" change="{!c.validateRequestedProdDate}" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-form-element__row">
+                        <div class="slds-form-element slds-size--1-of-2">
+                            <label class="slds-form-element__label">Controlled Deployment/Pilot Request</label>
+                            <div class="slds-form-element__control">
+                                <ui:inputSelect aura:id="controlleddeploymentrequest" class="slds-select" value="{!v.cs.Controlled_Deployment_Pilot_Requested__c}" />
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-size--1-of-2">
+                            <label class="slds-form-element__label">Release Communication Required</label>
+                            <div class="slds-form-element__control">
+                                <ui:inputSelect aura:id="releasecommunicationrequired" class="slds-select" value="{!v.cs.Release_communication_required__c}" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-form-element__row">
+                        <div class="slds-form-element slds-size--1-of-2">
+                            <c:CCSelect2 aura:id="regionCmp" selectId="regionCmp" label="Region(s)" obj="Case" fld="Region__c" inputRequired='true'/>
+                        </div>
+                    </div>
+
+                </div> <!-- / GROUP -->
+            </fieldset>
+            <!-- / FIELDSET Request Information -->
+
+            <!-- FIELDSET Other Info -->
+            <div aura:id="otherpanel" class="{!v.otherVisibility ? 'visible' : 'hidden'}">
+                <fieldset class="slds-form--compound slds-has-divider--bottom-space">
+                    <legend class="slds-form-element__label slds-text-title--caps">Additional Information</legend>
+                    <div class="slds-form-element__group">
+                        <div class="slds-form-element__row">
+                            <lightning:input class="slds-size--1-of-2" aura:id="mandate" type="checkbox" name="mandate" label="Mandate?" checked="{!v.cs.Mandate__c}" />
+                            <lightning:input class="slds-size--1-of-2" aura:id="specialreporting" type="checkbox" name="specialreporting" label="Is Special Reporting Needed?" 
+                                             checked="{!v.cs.Is_Special_Reporting_Needed__c}" onchange="{!c.onSpecialReportingChange}" />
+                        </div>
+                        <div class="{!v.reportingneedsVisibility ? 'slds-form-element__row visible' : 'slds-form-element__row hidden'}">
+                            <div class="slds-size--1-of-1">
+                                <lightning:textarea aura:id="reportingneeds" name="reportingneeds" value="{!v.cs.Special_Reporting_Needs__c}" label="Special Reporting Needs" required="true"
+                                                    messageWhenValueMissing="You must enter Special Reporting Needs" />
+                            </div>
+                        </div>
+                        <div class="slds-form-element__row">
+                            <div class="slds-form-element slds-size--1-of-2">
+                            <c:CCSelect2 aura:id="systemsimpactedCmp" selectId="systemsimpactedCmp" label="System(s) Impacted" obj="Case" fld="System_Impacted__c" inputRequired='true'/>
+                            </div>
+                        </div>
+                        <div class="slds-form-element__row">
+                            <div class="slds-form-element slds-size--1-of-2">
+                                <label class="slds-form-element__label"><abbr class="slds-required" title="required">*</abbr>Transaction</label>
+                                <div class="slds-form-element__control">
+                                    <ui:inputSelect aura:id="transaction" class="slds-select" value="{!v.cs.Transaction__c}" required="true" change="{!c.onTransactionChange}" />
+                                </div>
+                            </div>
+                            <div class="{!v.otherTransactionVisibility ? 'slds-form-element slds-size--1-of-2 visible' : 'slds-form-element slds-size--1-of-2 hidden'}">
+                                <lightning:input aura:id="othertransaction" name="othertransaction" label="Other Transaction" value="{!v.cs.Other_Transaction__c}"
+                                                 messageWhenValueMissing="You must enter an Other Transaction" />
+                            </div>
+                        </div>
+                    </div> <!-- / GROUP -->
+                    <div class="slds-form-element__row">
+                        <div class="slds-size--1-of-1">
+                            <lightning:textarea aura:id="justification" name="justification" value="{!v.cs.Justification_for_Request__c}" label="Justification for Request" required="true"
+                                             messageWhenValueMissing="You must enter a Justification for Request" />
+                        </div>
+                    </div>
+                    <div class="slds-form-element__row">
+                        <div class="slds-size--1-of-1">
+                            <lightning:textarea aura:id="impact" name="impact" value="{!v.cs.Impact_on_Payer_if_Date_is_Not_Met__c}" label="Impact If Date Not Met" />
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <!-- / FIELDSET Other Info -->
+            
+            <!-- FIELDSET DETAILS -->
+            <fieldset class="slds-form--compound--horizontal">
+                <legend class="slds-form-element__label slds-text-title--caps">Details</legend>
+                <div class="slds-form-element__group">
+                    <div class="slds-form-element__row">
+                        <div class="slds-size--1-of-1">
+                            <lightning:input aura:id="subject" type="text" label="Subject" name="subject" value="{!v.cs.Subject}" onblur="{!c.doArticleSearch}" required="true"
+                                             messageWhenValueMissing="You must enter a Subject" />
+                        </div>
+                    </div>
+                    <div class="slds-form-element__row">
+                        <div class="slds-size--1-of-1">
+                            <lightning:textarea aura:id="description" name="description" value="{!v.cs.Description}" label="Description" required="true" onblur="{!c.doArticleSearch}"
+                                             messageWhenValueMissing="You must enter a Description" />
+                        </div>
+                    </div>
+                    <br/>
+                    <div class="slds-form-element__row">
+                        <lightning:input class="slds-size--1-of-2" aura:id="crformattached" type="checkbox" name="crformattached" label="Attaching CR Form or Requirements?" checked="{!v.cs.Attachment__c}"
+                                             onchange="{!c.onCRFormAttachedChange}" />
+                    </div>
+                    <div class="{!v.crformattachedVisibility ? 'slds-form-element__row visible' : 'slds-form-element__row hidden'}">
+                        <div class="slds-size--1-of-1">
+                            <div class="slds-scoped-notification slds-media slds-media_center slds-scoped-notification_dark" role="status">
+                                <div class="slds-media__figure">
+                                    <span class="slds-icon_container slds-icon-utility-info" title="information">
+                                        <lightning:icon iconName="utility:info" variant="inverse" size="x-small" alternativeText="Information" class="slds-icon slds-icon--hint"/>
+                                        <span class="slds-assistive-text">Information</span>
+                                    </span>
+                                </div>
+                                <div class="slds-media__body">
+                                    <p>To add attachments, first save this ticket then click Add Attachment</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br/>
+                </div>
+            </fieldset>
+            <!-- / FIELDSET DETAILS -->
+        </div>
+        <!-- / MAIN COL -->
+
+        <!-- NARROW COL -->
+        <!-- / NARROW COL -->
+            
+    </div>
+    <!-- / GRID -->
+    <!-- PAGE HEADER -->
+    <div class="slds-page-header">
+        <!-- PAGE HEADER TOP ROW -->
+        <div class="slds-grid">
+            <!-- PAGE HEADER / ROW 1 / COLUMN 1 -->
+            <div class="slds-col slds-has-flexi-truncate">
+            </div>
+            <!-- / PAGE HEADER / ROW 1 / COLUMN 1 -->
+            <!-- PAGE HEADER / ROW 1 / COLUMN 2 -->
+            <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                <div class="slds-button-group" role="group">
+                    <lightning:button label="Save" name="btnSave" aura:id="btnSave" disabled="false" variant="brand" onclick="{!c.doSave}" />
+                    <lightning:button label="Cancel" name="btnCancel" aura:id="btnCancel" disabled="false" variant="neutral" onclick="{!c.doCancel}" />
+                </div>
+            </div>
+            <!-- / PAGE HEADER / ROW 1 / COLUMN 2 -->
+        </div>
+        <!-- / PAGE HEADER TOP ROW -->
+    </div>
+    <!-- / PAGE HEADER -->
+
+</aura:component>

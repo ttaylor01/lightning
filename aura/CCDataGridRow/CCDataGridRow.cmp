@@ -1,0 +1,22 @@
+<aura:component >
+    
+    <aura:attribute name="data" 
+                    type="String" 
+                    required="false" 
+                    default="text"
+                    access="GLOBAL"
+                    description="List of data items"/>
+    
+    <aura:attribute name="delimiter" 
+                    type="String"  
+                    required="false"
+                    default=","
+                    access="GLOBAL" />
+    
+    <aura:attribute name="pk" 
+                    type="String" 
+                    required="true" 
+                    access="GLOBAL"
+                    description="Primary Key Id"/>
+    
+</aura:component>

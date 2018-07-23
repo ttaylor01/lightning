@@ -1,0 +1,9 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global" >
+    <div class="slds-grid slds-grid--align-center">
+        <div class="slds-col content">
+            <div class="logoContainer">
+                <img src="{!$Resource.CCHomePageImage}"/>
+            </div>
+        </div>
+    </div>
+</aura:component>

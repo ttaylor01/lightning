@@ -1,0 +1,18 @@
+/*toggleCss.css*/
+.THIS .hidden {
+    display: none;
+}
+.THIS.slds-panel .hide-component {
+    display: none;
+}
+.THIS .hide-button {
+    display: none;
+}
+.THIS.hide-modal {
+    display: none !important;
+}
+/*
+.THIS div {
+    border:1px solid red;
+}
+*/

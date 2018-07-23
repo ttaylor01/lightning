@@ -1,0 +1,16 @@
+@media (max-width: 767px) {
+ .THIS .hiddenColumn {
+    display: none !important;
+ }
+}
+.THIS.caselist {
+    height: calc(100% - 50px)
+}
+.THIS .slds-is-selected td {
+    font-weight: bold;
+}
+/*
+.THIS div {
+    border:1px solid red;
+}
+*/
