@@ -1,0 +1,15 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" controller="CCBilling" access="global" extends="c:CCBillingUtility" >
+	<aura:attribute name="accounts" type="Zuora__CustomerAccount__c[]" />
+	<aura:attribute name="currentView" 
+                    type="String" 
+                    default="accountSelect"
+                    description="The currently active view" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="goToTarget"
+                  event="c:CCsObjectEvent" 
+                  action="{!c.goToTargetView}"/>
+
+    <div aura:id="mainContainer">
+        {!v.body}
+    </div>
+</aura:component>

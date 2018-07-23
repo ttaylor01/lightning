@@ -1,0 +1,286 @@
+<aura:component controller="CCBilling" access="global" extends="c:CCBillingUtility">
+    <aura:attribute name="recordId" type="String" default="" />
+	<aura:attribute name="ba" type="CCBillingAccountWrapper" default="{'sobjectType':'CCBillingAccountWrapper'}" />
+	<aura:attribute name="billToContact" type="CCBillingContactWrapper" default="{'sobjectType':'CCBillingContactWrapper'}" />
+	<aura:attribute name="soldToContact" type="CCBillingContactWrapper" default="{'sobjectType':'CCBillingContactWrapper'}" />
+    <aura:attribute name="hasMulitipleBillingAccounts" type="Boolean" default="false" />
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <!-- Event handlers -->
+    <aura:handler name="hideEditAccountDialog" event="c:CCCancelDialog" action="{!c.hideEditAccountDialog}"/>
+    <aura:handler name="hideEditContactDialog" event="c:CCCancelDialog" action="{!c.hideEditContactDialog}"/>
+    <aura:registerEvent name="goToTarget" type="c:CCsObjectEvent"/>
+
+    <aura:handler name="showSpinner" event="c:CCWaiting" action="{!c.doWait}"/>
+    <aura:handler name="hideSpinner" event="c:CCDoneWaiting" action="{!c.stopWait}"/>
+    <aura:handler event="aura:waiting" action="{!c.doWait}"/>
+    <aura:handler event="aura:doneWaiting" action="{!c.stopWait}"/>
+    
+    <lightning:spinner aura:id="spinner" variant="brand" size="large" class="slds-hide" alternativeText="Please wait while processing request..."/>
+
+<div aura:id="editaccountModal" class="hide-modal"></div>
+<div aura:id="editcontactModal" class="hide-modal">
+    <c:CCBillingContactEdit aura:id="editContactCmp" recordId="{!v.recordId}" billingContact="{!v.billToContact}" />
+</div>
+
+    <!-- Help & Support Grid -->
+    <div class="slds-grid slds-wrap slds-p-right_medium">
+        <!-- MAIN COL -->
+        <div class="slds-col slds-size--1-of-1">
+            <div class="slds-col slds-float_right">
+                <a href="javascript:void(0);" class="slds-text-body_small slds-text-link" onclick="{!c.doContactSupport}" >Help &amp; Support</a>
+            </div>
+        </div>
+    </div>
+
+<!-- GRID -->
+<div class="slds-grid slds-wrap">
+    <!-- MAIN COL -->
+    <div class="slds-col slds-p-right--small slds-size--1-of-1 slds-large-size_6-of-12">
+
+    <!-- PAGE HEADER -->
+    <div class="slds-page-header">
+        <!-- PAGE HEADER TOP ROW -->
+        <div class="slds-grid">
+            <!-- PAGE HEADER / ROW 1 / COLUMN 1 -->
+            <div class="slds-col slds-has-flexi-truncate">
+                <!-- HEADING AREA -->
+                <!-- MEDIA OBJECT = FIGURE + BODY -->
+                <div class="slds-media slds-no-space slds-grow">
+                    <div class="slds-media__figure">
+                        <lightning:icon iconName="standard:account" alternativeText="Billing Account" class="slds-icon"/>
+                    </div>
+                    <div class="slds-media__body slds-media--center">
+                        <p class="slds-text-title--caps slds-line-height--reset slds-truncate">Billing Account</p>
+                        <h2 class="slds-page-header__title slds-m-right--small slds-align-middle slds-truncate" title="Account Number">{!v.ba.accountNumber}</h2>
+                    </div>
+                </div>
+                <!-- / MEDIA OBJECT -->
+                <!-- HEADING AREA -->
+            </div>
+            <!-- / PAGE HEADER / ROW 1 / COLUMN 1 -->
+            <!-- PAGE HEADER / ROW 1 / COLUMN 2 -->
+            <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                <lightning:button label="Payment Methods" class="" aura:id="btnPaymentMethods" disabled="false" variant="neutral" onclick="{!c.doManagePaymentMethods}" />
+            </div>
+            <!-- / PAGE HEADER / ROW 1 / COLUMN 2 -->
+        </div>
+        <!-- / PAGE HEADER TOP ROW -->
+    </div>
+    <!-- / PAGE HEADER -->
+
+    <!-- Account Record Detail -->
+    <div class="slds-panel">
+        <!-- FORM INLINE -->
+        <div class="slds-form--inline">
+	        <!-- PANEL BOILERPLATE STUFF -->
+            <div class="slds-panel__section">
+                <div class="slds-grid slds-grid--pull-padded slds-wrap">
+                    <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                        <div class="{!v.hasMulitipleBillingAccounts ? 'visible' : 'hidden'}">
+                            <button class="slds-button slds-float--right slds-button--icon slds-button--icon-small" title="Select Another Account" onclick="{!c.doSelectAccount}" >
+                                <lightning:icon iconName="utility:task" size="x-small" alternativeText="Select Another Account" class="slds-button__icon slds-button__icon--hint"/>
+                                <span class="slds-assistive-text">Select Another Account</span>
+                            </button>
+                        </div>
+                        <span class="slds-form-element__label">Name</span>
+                        <div class="slds-form-element__control">
+                            <span class="slds-form-element__static">{!v.ba.name}</span>
+                        </div>
+                    </div>
+                    <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                        <span class="slds-form-element__label">Account Number</span>
+                        <div class="slds-form-element__control">
+                            <span class="slds-form-element__static">{!v.ba.accountNumber}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-grid slds-grid--pull-padded slds-wrap">
+                    <div aura:id="outputAutoPay" class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                        <button class="slds-button slds-float--right slds-button--icon slds-button--icon-small" title="Edit this Field" onclick="{!c.showEditAccountDialog}" >
+                            <lightning:icon iconName="utility:edit" size="x-small" alternativeText="Edit" class="slds-button__icon slds-button__icon--hint"/>
+                            <span class="slds-assistive-text">Edit this Field</span>
+                        </button>
+                        <span class="slds-form-element__label">Auto Pay</span>
+                        <div class="slds-form-element__control">
+                            <aura:if isTrue="{!v.ba.autoPay == true}">
+                                <span class="slds-form-element__static">Enabled</span>
+                            </aura:if>
+                            <aura:if isTrue="{!v.ba.autoPay == false}">
+                                <span class="slds-form-element__static">Disabled</span>
+                            </aura:if>
+                        </div>
+                    </div>
+                    <div aura:id="outputPaymentMethod" class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                        <button class="slds-button slds-float--right slds-button--icon slds-button--icon-small" title="Edit this Field" onclick="{!c.showEditAccountDialog}" >
+                            <lightning:icon iconName="utility:edit" size="x-small" alternativeText="Edit" class="slds-button__icon slds-button__icon--hint"/>
+                            <span class="slds-assistive-text">Edit this Field</span>
+                        </button>
+                        <span class="slds-form-element__label">Default Payment Method</span>
+                        <div class="slds-form-element__control">
+                            <span class="slds-form-element__static"><aura:unescapedHtml value="{!v.ba.paymentMethodString}" /></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- / PANEL BOILERPLATE STUFF -->
+        </div>
+        <!-- / FORM INLINE -->
+    </div>
+    <!-- / Account Record Detail -->
+
+    </div>
+    <!-- / MAIN COL -->
+
+    <!-- NARROW COL -->
+    <div class="slds-col slds-size--1-of-1 slds-large-size_6-of-12">
+    <div class="slds-grid slds-wrap">
+        <!-- Bill To Contact Record Detail -->
+        <div class="slds-col slds-p-right--small slds-size--1-of-1 slds-medium-size--6-of-12 slds-large-size_6-of-12">
+        <div class="slds-page-header">
+            <!-- PAGE HEADER TOP ROW -->
+            <div class="slds-grid">
+                <!-- PAGE HEADER / ROW 1 / COLUMN 1 -->
+                <div class="slds-col slds-has-flexi-truncate">
+                    <!-- HEADING AREA -->
+                    <!-- MEDIA OBJECT = FIGURE + BODY -->
+                    <div class="slds-media slds-no-space slds-grow">
+                        <div class="slds-media__figure">
+                            <lightning:icon iconName="standard:contact" alternativeText="Bill To Contact" class="slds-icon"/>
+                        </div>
+                        <div class="slds-media__body slds-media--center">
+                            <p class="slds-text-title--caps slds-line-height--reset">Bill To</p>
+                            <span class="slds-text-body_small slds-text-color_weak">Contact</span>
+                        </div>
+                    </div>
+                    <!-- / MEDIA OBJECT -->
+                    <!-- HEADING AREA -->
+                </div>
+                <!-- / PAGE HEADER / ROW 1 / COLUMN 1 -->
+                <!-- PAGE HEADER / ROW 1 / COLUMN 2 -->
+                <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                    <lightning:buttonIcon class="" aura:id="btnEditBTContact" name="BillTo" iconName="utility:edit" disabled="false" variant="border-filled" onclick="{!c.showEditContactDialog}" alternativeText="Edit Contact"/>
+                </div>
+                <!-- / PAGE HEADER / ROW 1 / COLUMN 2 -->
+            </div>
+            <!-- / PAGE HEADER TOP ROW -->
+        </div>
+        <!-- / PAGE HEADER -->
+        <div class="slds-panel">
+            <!-- FORM INLINE -->
+            <div class="slds-form--inline">
+                <div aura:id="outputBillToContact" class="slds-panel__section">
+                    <div class="slds-grid slds-grid--pull-padded slds-wrap">
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                            <span class="slds-form-element__label">Name</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.billToContact.firstName}&nbsp;{!v.billToContact.lastName}</span>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                            <span class="slds-form-element__label">Email</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.billToContact.email}</span>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                            <span class="slds-form-element__label">Phone</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.billToContact.phone}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- / FORM INLINE -->
+        </div>
+        </div> <!-- slds-col 1-of-2 -->
+        <!-- / Bill To Contact Record Detail -->
+
+        <!-- Sold To Contact Record Detail -->
+        <div class="slds-col slds-p-right--small slds-size--1-of-1 slds-medium-size--6-of-12 slds-large-size_6-of-12">
+        <div class="slds-page-header">
+            <!-- PAGE HEADER TOP ROW -->
+            <div class="slds-grid">
+                <!-- PAGE HEADER / ROW 1 / COLUMN 1 -->
+                <div class="slds-col slds-has-flexi-truncate">
+                    <!-- HEADING AREA -->
+                    <!-- MEDIA OBJECT = FIGURE + BODY -->
+                    <div class="slds-media slds-no-space slds-grow">
+                        <div class="slds-media__figure">
+                            <lightning:icon iconName="standard:contact" alternativeText="Sold To Contact" class="slds-icon"/>
+                        </div>
+                        <div class="slds-media__body slds-media--center">
+                            <p class="slds-text-title--caps slds-line-height--reset">Sold To</p>
+                            <span class="slds-text-body_small slds-text-color_weak">Contact</span>
+                        </div>
+                    </div>
+                    <!-- / MEDIA OBJECT -->
+                    <!-- HEADING AREA -->
+                </div>
+                <!-- / PAGE HEADER / ROW 1 / COLUMN 1 -->
+                <!-- PAGE HEADER / ROW 1 / COLUMN 2 -->
+                <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                    <lightning:buttonIcon class="" aura:id="btnEditSTContact" name="SoldTo" iconName="utility:edit" disabled="false" variant="border-filled" onclick="{!c.showEditContactDialog}" alternativeText="Edit Contact"/>
+                </div>
+                <!-- / PAGE HEADER / ROW 1 / COLUMN 2 -->
+            </div>
+            <!-- / PAGE HEADER TOP ROW -->
+        </div>
+        <!-- / PAGE HEADER -->
+        <div class="slds-panel">
+            <!-- FORM INLINE -->
+            <div class="slds-form--inline">
+                <div aura:id="outputSoldToContact" class="slds-panel__section">
+                    <div class="slds-grid slds-grid--pull-padded slds-wrap">
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                            <span class="slds-form-element__label">Name</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.soldToContact.firstName}&nbsp;{!v.soldToContact.lastName}</span>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                            <span class="slds-form-element__label">Email</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.soldToContact.email}</span>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                            <span class="slds-form-element__label">Phone</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.soldToContact.phone}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- / FORM INLINE -->
+        </div>
+        </div> <!-- slds-col 1-of-2 -->
+        <!-- / Sold To Contact Record Detail -->
+
+    </div>
+    </div>
+    <!-- / NARROW COL -->
+   
+</div>
+<!-- / GRID -->
+
+<div aura:id="invoiceList" class="">
+    <c:CCBillingManagement aura:id="invoiceListCmp" recordId="{!v.recordId}" />
+</div>
+
+<!-- GRID -->
+
+    <!-- Contact Support Grid -->
+    <div class="slds-grid slds-wrap slds-m-top--large">
+        <!-- MAIN COL -->
+        <div class="slds-col slds-size--1-of-1">
+            <div class="slds-col slds-text-align_center">
+                <span class="slds-text-body_small slds-p-right_xx-small" >Have a question, or need help with your invoice?</span>
+                <a href="javascript:void(0);" class="slds-text-body_small slds-text-link" onclick="{!c.doContactSupport}" ><strong>Contact support here</strong></a>.
+            </div>
+        </div>
+    </div>
+
+</aura:component>

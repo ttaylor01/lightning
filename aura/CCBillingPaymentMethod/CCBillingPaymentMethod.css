@@ -1,0 +1,23 @@
+/*toggleCss.css*/
+.THIS.hiddenGrid {
+    display: none;
+}
+.THIS .hidden {
+    display: none;
+}
+.THIS .hide-component {
+    display: none;
+}
+.THIS .hide-button {
+    display: none;
+}
+.THIS.hide-modal {
+    display: none !important;
+}
+.THIS.horizontalAlign {
+    display: inline-block;
+}
+.THIS .hasError {
+	border: 2px solid #b3002a !important;
+    border-radius: 5px;
+}

@@ -1,0 +1,82 @@
+<aura:component controller="CCBilling" access="global" extends="c:CCBillingUtility">
+    <aura:attribute name="recordId" type="String" default="" />
+	<aura:attribute name="billingContact" type="CCBillingContactWrapper" default="{'sobjectType':'CCBillingContactWrapper'}" access="global"/>
+
+    <aura:registerEvent name="hideEditContactDialog" type="c:CCCancelDialog"/>
+    <aura:registerEvent name="showSpinner" type="c:CCWaiting"/>
+    <aura:registerEvent name="hideSpinner" type="c:CCDoneWaiting"/>
+    <!-- Event handlers -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:method name="setBillingContact" action="{!c.setBillingContact}">
+        <aura:attribute name="billingContact" type="CCBillingContactWrapper" default="{'sobjectType':'CCBillingContactWrapper'}"/>
+    </aura:method>
+    
+    <div aura:id="editcontactdialog" role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+            <div class="slds-modal__header">
+                <lightning:buttonIcon class="slds-modal__close" 
+                                      iconName="utility:close" 
+                                      size="medium" 
+                                      variant="bare-inverse" 
+                                      alternativeText="Close" 
+                                      onclick="{!c.doCancel}"/>
+ 
+                <h2 id="header" class="slds-text-heading--medium">Edit Billing Contact</h2>
+            </div>
+            <div class="slds-modal__content slds-p-around--medium">
+                
+                <div class="slds-panel">
+                    <!-- FORM STACKED -->
+                    <div class="slds-form">
+                        <div class="slds-panel__section">
+                            <div class="slds-grid slds-grid--pull-padded slds-wrap">
+                                <div class="slds-form-element__group">
+                                    <div class="slds-form-element__row">
+                                        <lightning:input class="slds-size--1-of-1" aura:id="billingContactFirstName" name="billingContactFirstName" label="First Name" value="{!v.billingContact.firstName}"
+                                                         required="true" messageWhenValueMissing="You must enter a valid First Name" />
+                                        <lightning:input class="slds-size--1-of-1" aura:id="billingContactLastName" name="billingContactLastName" label="Last Name" value="{!v.billingContact.lastName}"
+                                                         required="true" messageWhenValueMissing="You must enter a valid Last Name" />
+                                    </div>
+                                    <div class="slds-form-element__row">
+                                        <lightning:input class="slds-size--1-of-1" aura:id="billingContactEmail" type="email" label="Email" name="billingContactEmail" value="{!v.billingContact.email}"
+                                                         required="true" messageWhenValueMissing="Please enter a valid email format." messageWhenPatternMismatch="Please enter a valid email format." />
+                                    </div>
+                                    <div class="slds-form-element__row">
+                                        <lightning:input class="slds-size--1-of-1" aura:id="billingContactPhone" type="tel" label="Phone" name="billingContactPhone" value="{!v.billingContact.phone}"
+                                                         pattern="^(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?$" 
+                                                         required="true" messageWhenPatternMismatch="Please enter a valid telephone format." messageWhenValueMissing="Please enter a valid telephone format."/>
+                                    </div>
+                                    <div class="slds-form-element__row">
+                                        <lightning:input class="slds-size--1-of-1" aura:id="billingContactCity" name="billingContactCity" label="City" value="{!v.billingContact.city}" />
+                                    </div>
+                                    
+                                    <div class="slds-form-element__row">
+                                        <div aura:id="inputBillToContactState" class="slds-form-element slds-hint-parent slds-size--1-of-1">
+                                            <span class="slds-form-element__label">State</span>
+                                            <div class="slds-form-element__control">
+                                                <ui:inputSelect aura:id="billingContactState" class="slds-select" value="{!v.billingContact.state}" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="slds-form-element__row">
+                                        <lightning:input class="slds-size--1-of-1" aura:id="billingContactPostalCode" name="billingContactPostalCode" label="Postal Code" value="{!v.billingContact.postalCode}" 
+                                                         pattern="[0-9]{5}" messageWhenPatternMismatch="Please enter a valid 5 digit zip code." />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- / FORM STACKED -->
+                </div>
+
+            </div>
+            <div class="slds-modal__footer">
+                <lightning:button label="Cancel" aura:id="btnCancel" variant="neutral" onclick="{!c.doCancel}" />
+                <lightning:button label="Save" aura:id="btnSave" variant="brand" onclick="{!c.doSave}" />
+            </div>
+        </div>
+    </div>
+    <div aura:id="editcontactbackdrop" class="slds-backdrop slds-backdrop--open"></div>
+
+</aura:component>

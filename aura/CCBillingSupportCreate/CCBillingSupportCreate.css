@@ -1,0 +1,16 @@
+.THIS .hidden {
+    display: none;
+}
+.THIS .hide-button {
+    display: none;
+}
+/*
+* Added hide-error-message class to apply to slds-form-element__help class
+* for the DIV that is added by Salesforce when lightning:input component has invalid input.
+* This is intended to hide the error message when I want to clear the validation dynamically.
+* Salesforce should provide something to do this for me on lightning:input components
+* similarly to how the ui:input components do with settings the errors attribute.
+*/
+.THIS .hide-error-message > .slds-form-element__help {
+    display: none;
+}

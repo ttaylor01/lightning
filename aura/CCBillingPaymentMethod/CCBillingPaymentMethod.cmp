@@ -1,0 +1,379 @@
+<aura:component controller="CCBillingPaymentMethod" extends="c:CCBillingUtility">
+    <aura:attribute name="recordId" type="String" default="" />
+    <aura:attribute name="pmw" type="CCPaymentMethodWrapper"/>
+    <aura:attribute name="creditCards" type="CCPaymentMethodObject[]"/>
+    <aura:attribute name="bankAccounts" type="CCPaymentMethodObject[]"/>
+    <aura:attribute name="cc" type="CCPaymentMethodObject" default="{'sobjectType':'CCPaymentMethodObject','paymentMethodType':'CreditCard'}"/>
+    <aura:attribute name="ach" type="CCPaymentMethodObject" default="{'sobjectType':'CCPaymentMethodObject','paymentMethodType':'ACH'}"/>
+    <aura:attribute name="cardTypes" type="List"/>
+    <aura:attribute name="achListVisibility" type="Boolean" default="true" />
+    <aura:attribute name="achVisibility" type="Boolean" default="false" />
+    <aura:attribute name="creditcardListVisibility" type="Boolean" default="true" />
+    <aura:attribute name="creditcardVisibility" type="Boolean" default="false" />
+    <aura:attribute name="cardtypeError" type="Boolean" default="false" />
+    <aura:attribute name="selectedRecordId" type="String" access="PRIVATE" description="The currently selected record id" default=""/>
+    <aura:attribute name="selectedRowEl" type="Object" access="PRIVATE" description="The currently selected record element" default=""/>
+    <aura:attribute name="selectedColEl" type="Object" access="PRIVATE" description="The currently selected column element" default=""/>
+    <aura:attribute name="paymentMethodType" type="String" default="" />
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="cancelTermsAndAgreementDialog" event="c:CCCancelDialog" action="{!c.cancelTermsAndAgreementDialog}"/>
+    <aura:handler name="agreeToTermsAndAgreementDialog" event="c:CCCancelDialog" action="{!c.agreeToTermsAndAgreementDialog}"/>
+    <aura:registerEvent name="goToTarget" type="c:CCsObjectEvent"/>
+    <aura:handler event="aura:waiting" action="{!c.doWait}"/>
+    <aura:handler event="aura:doneWaiting" action="{!c.stopWait}"/>
+	
+    <lightning:spinner aura:id="spinner" variant="brand" size="large" class="slds-hide" alternativeText="Please wait while processing request..."/>
+
+<div aura:id="taaModal" class="hide-modal">
+    <c:CCTermsAndAgreements aura:id="taaCmp" recordId="{!v.recordId}" />
+</div>
+
+    <!-- Help & Support Grid -->
+    <div class="slds-grid slds-wrap slds-p-right_medium">
+        <!-- MAIN COL -->
+        <div class="slds-col slds-size--1-of-1">
+            <div class="slds-col slds-float_right">
+                <a href="javascript:void(0);" class="slds-text-body_small slds-text-link" onclick="{!c.doContactSupport}" >Help &amp; Support</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- CC List -->
+    <div class="{!v.creditcardListVisibility ? 'visible' : 'hiddenGrid'}">
+        <div class="slds-page-header">
+            <!-- PAGE HEADER TOP ROW -->
+            <div class="slds-grid slds-wrap">
+                <!-- PAGE HEADER / ROW 1 / COLUMN 1 -->
+                <div class="slds-col slds-has-flexi-truncate">
+                    <!-- HEADING AREA -->
+                    <!-- MEDIA OBJECT = FIGURE + BODY -->
+                    <div class="slds-media slds-no-space slds-grow">
+                        <div class="slds-media__figure">
+                            <lightning:icon iconName="custom:custom16" alternativeText="Credit Cards" class="slds-icon slds-icon-standard-case"/>
+                        </div>
+                        <div class="slds-media__body slds-media--center">
+                            <p class="slds-text-title--caps slds-line-height--reset">Credit Cards</p>
+                            <a onclick="{!c.backToAccount}" href="javascript:void(0);" class="slds-text-link--reset"><span class="slds-text-link">&laquo; Back to Account</span></a>
+                        </div>
+                    </div>
+                    <!-- / MEDIA OBJECT -->
+                    <!-- HEADING AREA -->
+                </div>
+                <!-- / PAGE HEADER / ROW 1 / COLUMN 1 -->
+                
+                <!-- PAGE HEADER / ROW 1 / COLUMN 2 -->
+                <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                    <div class="slds-button-group" role="group">
+                        <lightning:button label="Add Credit Card" class="{!(v.creditcardVisibility)?'hide-button':''}" aura:id="btnAddCC" disabled="false" variant="neutral" onclick="{!c.setAddCreditCardMode}" />
+                    </div>
+                </div>
+                <!-- / PAGE HEADER / ROW 1 / COLUMN 2 -->
+            </div>
+            <!-- / PAGE HEADER TOP ROW -->
+        </div>
+        <div class="slds-scrollable">
+            <table class="slds-table slds-table--bordered slds-table--fixed-layout">
+                <thead>
+                    <tr class="slds-text-heading--label">
+                        <th class="" scope="col" style="width:45%;">Credit Cards</th>
+                        <th class="" scope="col" style="width:30%;">Expires</th>
+                        <th class="hiddenColumn" scope="col" style="width:25%;">Action</th>
+                    </tr>
+                </thead>
+                <tbody >
+                    <aura:iteration var="pm" items="{!v.creditCards}" indexVar="idx">
+                        <tr class="slds-hint-parent" >
+                            <td class="slds-truncate">
+                                <span><img src="{!pm.image}" align="middle" />&nbsp;&nbsp;{!pm.creditCardNumber}</span>
+                            </td>
+                            <td class="slds-truncate">
+                                <span>{!pm.expires}</span>
+                            </td>
+                            <td class="slds-truncate hiddenColumn">
+                                <a class="{!(pm.defaultMethod)?'hidden':'visible'}" onclick="{!c.doDelete}" data-pk="{!pm.zuoraId}" href="javascript:void(0);"> Remove</a>
+                            </td>
+                        </tr>
+                    </aura:iteration>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- / CC List -->
+    <!-- / ADD Credit Card GRID -->
+    <div class="{!v.creditcardVisibility ? 'slds-grid slds-wrap visible' : 'slds-grid slds-wrap hiddenGrid'}">
+        <div class="slds-col slds-size--7-of-12">
+            <!-- CC Record Detail -->
+            <div class="slds-page-header">
+                <!-- PAGE HEADER TOP ROW -->
+                <div class="slds-grid">
+                    <!-- PAGE HEADER / ROW 1 / COLUMN 1 -->
+                    <div class="slds-col slds-has-flexi-truncate">
+                        <!-- HEADING AREA -->
+                        <!-- MEDIA OBJECT = FIGURE + BODY -->
+                        <div class="slds-media slds-no-space slds-grow">
+                            <div class="slds-media__figure">
+                                <lightning:icon iconName="custom:custom16" alternativeText="Credit Cards" class="slds-icon slds-icon-standard-case"/>
+                            </div>
+                            <div class="slds-media__body slds-media--center">
+                                <p class="slds-text-title--caps slds-line-height--reset">New Credit Card</p>
+                                <a onclick="{!c.doCancelCC}" href="javascript:void(0);" class="slds-text-link--reset"><span class="slds-text-link">&laquo; Back to Payment Methods</span></a>
+                            </div>
+                        </div>
+                        <!-- / MEDIA OBJECT -->
+                        <!-- HEADING AREA -->
+                    </div>
+                    <!-- / PAGE HEADER / ROW 1 / COLUMN 1 -->
+                    <!-- PAGE HEADER / ROW 1 / COLUMN 2 -->
+                    <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                        <div class="slds-button-group" role="group">
+                            <lightning:button label="Save" aura:id="btnSaveCC_top" name="CreditCard" disabled="false" variant="brand" onclick="{!c.doSave}" />
+                            <lightning:button label="Cancel" aura:id="btnCancelCC" name="CreditCard" disabled="false" variant="neutral" onclick="{!c.doCancel}" />
+                        </div>
+                    </div>
+                    <!-- / PAGE HEADER / ROW 1 / COLUMN 2 -->
+                </div>
+                <!-- / PAGE HEADER TOP ROW -->
+            </div>
+            <!-- / PAGE HEADER -->
+        </div>
+        <div class="slds-col slds-p-horizontal--small slds-col--rule-right slds-size--7-of-12">
+            <fieldset class="slds-form--compound slds-has-divider--bottom-space">
+                <div class="slds-form-element__group">
+                    <div class="slds-form-element__row">
+                        <fieldset class="slds-form-element slds-hint-parent slds-size--1-of-1">
+                            <legend class="slds-form-element__legend slds-form-element__label"><abbr class="slds-required" title="required">*</abbr>Card Type</legend>
+                            <div class="slds-form-element__control">
+                                <aura:iteration var="type" items="{!v.cardTypes}" indexVar="idx">
+                                    <span class="slds-radio" style="display:inline-block;">
+                                        <input type="radio" id="{!type.key}" name="creditcardtype" value="{!type.key}" onclick="{!c.onCreditCardTypeChange}" />
+                                        <label class="slds-radio__label" for="{!type.key}">
+                                            <span class="slds-radio_faux" aura:id="{!type.key}"></span>
+                                            <span class="slds-form-element__label"><aura:unescapedHtml value="{!type.value}" /></span>
+                                        </label>
+                                    </span>
+                                </aura:iteration>
+                                <div class="{!v.cardtypeError ? 'slds-form-element__help slds-text-color_error visible' : 'slds-form-element__help slds-text-color_error hidden'}">
+                                    You must select a Credit Card Type
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="slds-form-element__row">
+                        <div class="slds-form-element slds-size--1-of-1">
+                            <span class="slds-form-element__label"><abbr class="slds-required" title="required">*</abbr>Card Number</span>
+                            <div class="slds-form-element__control">
+                                <ui:inputText aura:id="cardnumber" class="slds-input" value="{!v.cc.creditCardNumber}" required="true"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-form-element__row">
+                        <div class="slds-form-element slds-size--1-of-2">
+                            <span class="slds-form-element__label"><abbr class="slds-required" title="required">*</abbr>Expiration Month</span>
+                            <div class="slds-form-element__control">
+                                <ui:inputSelect aura:id="expirationmonth" class="slds-select horizontalAlign" value="{!v.cc.creditCardExpirationMonth}" required="true"/>
+                            </div>
+                        </div>
+                        <div class="slds-form-element slds-size--1-of-2">
+                            <span class="slds-form-element__label"><abbr class="slds-required" title="required">*</abbr>Expiration Year</span>
+                            <div class="slds-form-element__control">
+                                <ui:inputSelect aura:id="expirationyear" class="slds-select horizontalAlign" value="{!v.cc.creditCardExpirationYear}" required="true"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-form-element__row">
+                        <div class="slds-form-element slds-size--1-of-1">
+                            <span class="slds-form-element__label"><abbr class="slds-required" title="required">*</abbr>CVV</span>
+                            <div class="slds-form-element__control">
+                                <ui:inputText aura:id="cvv" class="slds-input" value="{!v.cc.creditCardSecurityCode}" required="true"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-form-element__row">
+                        <lightning:input class="slds-size--1-of-1" aura:id="cardholdername" name="cardholdername" label="Cardholder Name" value="{!v.cc.creditCardHolderName}" required="true" 
+                                         messageWhenValueMissing="You must enter a Credit Cardholder Name" />
+                    </div>
+                    <div class="slds-form-element__row">
+                        <lightning:input class="slds-size--1-of-1" aura:id="cardaddress1" name="cardaddress1" label="Address 1" value="{!v.cc.creditCardAddress1}" />
+                    </div>
+                    <div class="slds-form-element__row">
+                        <lightning:input class="slds-size--1-of-1" aura:id="cardaddress2" name="cardaddress2" label="Address 2" value="{!v.cc.creditCardAddress2}" />
+                    </div>
+                    <div class="slds-form-element__row">
+                        <lightning:input class="slds-size--1-of-1" aura:id="cardcity" name="cardcity" label="City" value="{!v.cc.creditCardCity}" />
+                    </div>
+                    <div class="slds-form-element__row">
+                        <div class="slds-form-element slds-hint-parent slds-size--1-of-1">
+                            <span class="slds-form-element__label">State</span>
+                            <div class="slds-form-element__control">
+                                <ui:inputSelect aura:id="cardState" class="slds-select" value="{!v.cc.creditCardState}" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-form-element__row">
+                        <lightning:input class="slds-size--1-of-1" aura:id="cardpostalcode" name="cardpostalcode" label="Postal Code" value="{!v.cc.creditCardPostalCode}"
+                                         pattern="[0-9]{5}" messageWhenPatternMismatch="Please enter a valid 5 digit zip code." />
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        <div class="slds-col slds-size--7-of-12">
+            <div class="slds-page-header">
+                <div class="slds-grid">
+                    <div class="slds-col slds-has-flexi-truncate">
+                    </div>
+                    <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                        <div class="slds-button-group" role="group">
+                            <lightning:button label="Save" aura:id="btnSaveCC_bottom" name="CreditCard" disabled="false" variant="brand" onclick="{!c.doSave}" />
+                            <lightning:button label="Cancel" aura:id="btnCancelCC" name="CreditCard" disabled="false" variant="neutral" onclick="{!c.doCancel}" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- / ADD Credit Card GRID -->
+
+    <!-- ACH List -->
+    <div class="{!v.achListVisibility ? 'visible' : 'hiddenGrid'}">
+        <div class="slds-page-header">
+            <!-- PAGE HEADER TOP ROW -->
+            <div class="slds-grid slds-wrap">
+                <!-- PAGE HEADER / ROW 1 / COLUMN 1 -->
+                <div class="slds-col slds-has-flexi-truncate">
+                    <!-- HEADING AREA -->
+                    <!-- MEDIA OBJECT = FIGURE + BODY -->
+                    <div class="slds-media slds-no-space slds-grow">
+                        <div class="slds-media__figure">
+                            <lightning:icon iconName="custom:custom16" alternativeText="Automated Clearing House" class="slds-icon slds-icon-standard-case"/>
+                        </div>
+                        <div class="slds-media__body slds-media--center">
+                            <p class="slds-text-title--caps slds-line-height--reset">ACH Accounts</p>
+                            <a onclick="{!c.backToAccount}" href="javascript:void(0);" class="slds-text-link--reset"><span class="slds-text-link">&laquo; Back to Account</span></a>
+                        </div>
+                    </div>
+                    <!-- / MEDIA OBJECT -->
+                    <!-- HEADING AREA -->
+                </div>
+                <!-- / PAGE HEADER / ROW 1 / COLUMN 1 -->
+                
+                <!-- PAGE HEADER / ROW 1 / COLUMN 2 -->
+                <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                    <div class="slds-button-group" role="group">
+                        <lightning:button label="Add ACH Account" class="{!(v.achVisibility)?'hide-button':''}" aura:id="btnAddACH" disabled="false" variant="neutral" onclick="{!c.setAddACHMode}" />
+                    </div>
+                </div>
+                <!-- / PAGE HEADER / ROW 1 / COLUMN 2 -->
+            </div>
+            <!-- / PAGE HEADER TOP ROW -->
+        </div>
+        <div class="slds-scrollable">
+            <table class="slds-table slds-table--bordered slds-table--fixed-layout">
+                <thead>
+                    <tr class="slds-text-heading--label">
+                        <th class="" scope="col" style="width:75%;">ACH Account</th>
+                        <th class="hiddenColumn" scope="col" style="width:25%;">Action</th>
+                    </tr>
+                </thead>
+                <tbody >
+                    <aura:iteration var="pm" items="{!v.bankAccounts}" indexVar="idx">
+                        <tr class="slds-hint-parent" >
+                            <td class="slds-truncate">
+                                <span>{!pm.achBankName}&nbsp;&nbsp;{!pm.achAccountNumber}</span>
+                            </td>
+                            <td class="slds-truncate hiddenColumn">
+                                <a class="{!(pm.defaultMethod)?'hidden':'visible'}" onclick="{!c.doDelete}" data-pk="{!pm.zuoraId}" href="javascript:void(0);"> Remove</a>
+                            </td>
+                        </tr>
+                    </aura:iteration>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- / ACH List -->
+    <!-- / ADD ACH GRID -->
+    <div class="{!v.achVisibility ? 'slds-grid slds-wrap visible' : 'slds-grid slds-wrap hiddenGrid'}">
+        <div class="slds-col slds-size--7-of-12">
+            <!-- ACH Record Detail -->
+            <div class="slds-page-header">
+                <!-- PAGE HEADER TOP ROW -->
+                <div class="slds-grid">
+                    <!-- PAGE HEADER / ROW 1 / COLUMN 1 -->
+                    <div class="slds-col slds-has-flexi-truncate">
+                        <!-- HEADING AREA -->
+                        <!-- MEDIA OBJECT = FIGURE + BODY -->
+                        <div class="slds-media slds-no-space slds-grow">
+                            <div class="slds-media__figure">
+                                <lightning:icon iconName="custom:custom16" alternativeText="Automated Clearing House" class="slds-icon slds-icon-standard-case"/>
+                            </div>
+                            <div class="slds-media__body slds-media--center">
+                                <p class="slds-text-title--caps slds-line-height--reset">New ACH</p>
+                                <a onclick="{!c.doCancelACH}" name="ACH" href="javascript:void(0);" class="slds-text-link--reset"><span class="slds-text-link">&laquo; Back to Payment Methods</span></a>
+                            </div>
+                        </div>
+                        <!-- / MEDIA OBJECT -->
+                        <!-- HEADING AREA -->
+                    </div>
+                    <!-- / PAGE HEADER / ROW 1 / COLUMN 1 -->
+                    <!-- PAGE HEADER / ROW 1 / COLUMN 2 -->
+                    <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                        <div class="slds-button-group" role="group">
+                            <lightning:button label="Save" aura:id="btnSaveACH_top" name="ACH" disabled="false" variant="brand" onclick="{!c.doSave}" />
+                            <lightning:button label="Cancel" aura:id="btnCancelACH" name="ACH" disabled="false" variant="neutral" onclick="{!c.doCancel}" />
+                        </div>
+                    </div>
+                    <!-- / PAGE HEADER / ROW 1 / COLUMN 2 -->
+                </div>
+                <!-- / PAGE HEADER TOP ROW -->
+            </div>
+            <!-- / PAGE HEADER -->
+        </div>
+        <div class="slds-col slds-p-horizontal--small slds-col--rule-right slds-size--7-of-12">
+            <fieldset class="slds-form--compound slds-has-divider--bottom-space">
+                <div class="slds-form-element__group">
+                    <div class="slds-form-element__row">
+                        <lightning:input class="slds-size--1-of-1" aura:id="achaccountname" name="achaccountname" label="Name on Account" value="{!v.ach.achAccountName}" required="true" 
+                                         messageWhenValueMissing="You must enter a Name on the Account" />
+                    </div>
+                    <div class="slds-form-element__row">
+                        <lightning:input class="slds-size--1-of-1" aura:id="achAbaCode" name="achAbaCode" label="Bank Routing Number" value="{!v.ach.achAbaCode}" required="true" 
+                                         pattern="[0-9]{9}" messageWhenPatternMismatch="You must enter a valid Bank Routing Number"
+                                         messageWhenValueMissing="You must enter a valid Bank Routing Number" />
+                    </div>
+                    <div class="slds-form-element__row">
+                        <lightning:input class="slds-size--1-of-1" aura:id="achAccountNumber" name="achAccountNumber" label="Bank Account Number" value="{!v.ach.achAccountNumber}" required="true" 
+                                         messageWhenValueMissing="You must enter a Bank Account Number" />
+                    </div>
+                    <div class="slds-form-element__row">
+                        <div class="slds-form-element slds-size--1-of-1">
+                            <span class="slds-form-element__label"><abbr class="slds-required" title="required">*</abbr>Account Type</span>
+                            <div class="slds-form-element__control">
+                                <ui:inputSelect aura:id="achAccountType" class="slds-select" value="{!v.ach.achAccountType}" required="true"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-form-element__row">
+                        <lightning:input class="slds-size--1-of-1" aura:id="achBankName" name="achBankName" label="Bank Name" value="{!v.ach.achBankName}" required="true" 
+                                         messageWhenValueMissing="You must enter a Bank Name" />
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        <div class="slds-col slds-size--7-of-12">
+            <div class="slds-page-header">
+                <div class="slds-grid">
+                    <div class="slds-col slds-has-flexi-truncate">
+                    </div>
+                    <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                        <div class="slds-button-group" role="group">
+                            <lightning:button label="Save" aura:id="btnSaveACH_bottom" name="ACH" disabled="false" variant="brand" onclick="{!c.doSave}" />
+                            <lightning:button label="Cancel" aura:id="btnCancelACH" name="ACH" disabled="false" variant="neutral" onclick="{!c.doCancel}" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- / ADD ACH GRID -->
+
+</aura:component>

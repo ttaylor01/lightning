@@ -1,0 +1,21 @@
+@media (max-width: 767px) {
+ .THIS .hiddenColumn {
+    display: none !important;
+ }
+}
+/*toggleCss.css*/
+.THIS .hidden {
+    display: none;
+}
+.THIS .hide-component {
+    display: none;
+}
+.THIS .hide-button {
+    display: none;
+}
+.THIS.hide-modal {
+    display: none !important;
+}
+.THIS.horizontalAlign {
+    display: inline-block;
+}

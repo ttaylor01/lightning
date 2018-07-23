@@ -1,0 +1,73 @@
+<aura:component controller="CCBilling" access="global" extends="c:CCBillingUtility">
+    <aura:attribute name="recordId" type="String" default="" />
+	<aura:attribute name="accounts" type="Zuora__CustomerAccount__c[]" />
+	
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:registerEvent name="goToTarget" type="c:CCsObjectEvent"/>
+	
+    <lightning:spinner aura:id="spinner" variant="brand" size="large" class="slds-hide" alternativeText="Please wait while processing request..."/>
+
+    <!-- PAYMENT List -->
+    <div>
+        <div class="slds-col slds-size--1-of-1 slds-form--inline">
+            <div class="slds-page-header">
+                <!-- PAGE HEADER TOP ROW -->
+                <div class="slds-grid slds-wrap">
+                    <!-- PAGE HEADER / ROW 1 / COLUMN 1 -->
+                    <div class="slds-col slds-has-flexi-truncate">
+                        <!-- HEADING AREA -->
+                        <!-- MEDIA OBJECT = FIGURE + BODY -->
+                        <div class="slds-media slds-no-space slds-grow">
+                            <div class="slds-media__figure">
+                                <lightning:icon iconName="standard:account" alternativeText="Billing Accounts" class="slds-icon"/>
+                            </div>
+                            <div class="slds-media__body slds-media--center">
+                                <p class="slds-text-title--caps slds-line-height--reset">Billing Accounts</p>
+                                <h3 class="slds-m-right--small slds-align-middle slds-truncate" title="Ticket Number">Please Select an Account</h3>
+                            </div>
+                        </div>
+                        <!-- / MEDIA OBJECT -->
+                        <!-- HEADING AREA -->
+                    </div>
+                    <!-- / PAGE HEADER / ROW 1 / COLUMN 1 -->
+                    
+                    <!-- PAGE HEADER / ROW 1 / COLUMN 2 -->
+                    <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                    </div>
+                    <!-- / PAGE HEADER / ROW 1 / COLUMN 2 -->
+                </div>
+                <!-- / PAGE HEADER TOP ROW -->
+            </div>
+        </div>
+        <div class="slds-grid">
+            <div class="slds-scrollable">
+                <table class="slds-table slds-table--bordered slds-table--fixed-layout">
+                    <thead>
+                        <tr class="slds-text-heading--label">
+                            <th class="hiddenColumn" scope="col" style="width:160px;">Account ID</th>
+                            <th class="" scope="col">Name</th>
+                            <th class="" scope="col">Bill To Contact</th>
+                        </tr>
+                    </thead>
+                    <tbody >
+                        <aura:iteration var="a" items="{!v.accounts}" indexVar="idx">
+                            <tr class="slds-hint-parent" data-row="{!idx}" data-pk="{!a.Zuora__Zuora_Id__c}" onclick="{!c.onListItemClick}" >
+                                <td class="slds-truncate" style="width:160px;">
+                                    <span>{!a.Zuora__AccountNumber__c}</span>
+                                </td>
+                                <td class="slds-truncate" >
+                                    <span>{!a.Name}</span>
+                                </td>
+                                <td class="slds-truncate" >
+                                    <span>{!a.Zuora__BillToName__c}</span>
+                                </td>
+                            </tr>
+                        </aura:iteration>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- / ACCOUNT LIST -->
+
+</aura:component>

@@ -1,0 +1,83 @@
+<aura:component controller="CCBilling" access="global" extends="c:CCBillingUtility">
+    <aura:attribute name="recordId" type="String" default="" />
+	<aura:attribute name="ba" type="CCBillingAccountWrapper" default="{'sobjectType':'CCBillingAccountWrapper'}" />
+    <aura:attribute name="methodTypes" type="List"/>
+    <aura:attribute name="paymentmethodError" type="Boolean" default="false" />
+    <aura:attribute name="autopayError" type="Boolean" default="false" />
+    
+    <aura:registerEvent name="goToTarget" type="c:CCsObjectEvent"/>
+    <aura:registerEvent name="hideEditAccountDialog" type="c:CCCancelDialog"/>
+    <aura:registerEvent name="showSpinner" type="c:CCWaiting"/>
+    <aura:registerEvent name="hideSpinner" type="c:CCDoneWaiting"/>
+    <!-- Event handlers -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler event="aura:systemError" action="{!c.showSystemError}"/>
+    
+    <div aura:id="editaccountdialog" role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+            <div class="slds-modal__header">
+                <lightning:buttonIcon class="slds-modal__close" 
+                                      iconName="utility:close" 
+                                      size="medium" 
+                                      variant="bare-inverse" 
+                                      alternativeText="Close" 
+                                      onclick="{!c.doCancel}"/> 
+                
+                <h2 id="header43" class="slds-text-heading--medium">Edit Billing Account</h2>
+            </div>
+            <div class="slds-modal__content slds-p-around--medium">
+                
+                <div class="slds-panel">
+                    <!-- FORM STACKED -->
+                    <div class="slds-form--inline">
+                        <div class="slds-panel__section">
+                            <h5 class="slds-text-heading--small slds-m-bottom--medium">{!v.ba.name}</h5>
+                            <div class="slds-grid slds-grid--pull-padded slds-wrap">
+                                <div aura:id="inputAutoPay" class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-p-bottom_medium slds-size--1-of-1">
+                                    <lightning:input aura:id="autopay" type="checkbox" name="autopay" label="Auto Pay" checked="{!v.ba.autoPay}" />
+                                </div>
+
+                                <fieldset aura:id="inputPaymentMethod" class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                                    <legend class="slds-form-element__legend slds-form-element__label">Payment Methods</legend>
+                                    <div class="slds-form-element__control">
+                                        <aura:iteration var="type" items="{!v.methodTypes}" indexVar="idx">
+                                            <span class="slds-radio">
+                                                <aura:if isTrue="{!type.key != v.ba.defaultPaymentMethodId}">
+                                                    <input type="radio" id="{!type.key}" name="paymentmethods" value="{!type.key}" onclick="{!c.onPaymentMethodChange}" />
+                                                </aura:if>
+                                                <aura:if isTrue="{!type.key == v.ba.defaultPaymentMethodId}">
+                                                    <input type="radio" id="{!type.key}" name="paymentmethods" value="{!type.key}" onclick="{!c.onPaymentMethodChange}" checked="checked" />
+                                                </aura:if>
+                                                <label class="slds-radio__label" for="{!type.key}">
+                                                    <span class="slds-radio_faux" aura:id="{!type.key}"></span>
+                                                    <span class="slds-form-element__label"><aura:unescapedHtml value="{!type.value}" /></span>
+                                                </label>
+                                            </span>
+                                        </aura:iteration>
+                                    </div>
+                                    <div class="">
+                                        <a onclick="{!c.doManagePaymentMethods}" href="javascript:void(0);" class="slds-text-link--reset"><span class="slds-text-link">Add New Payment Method</span></a>
+                                    </div>
+                                    <ui:message class="{!v.paymentmethodError ? 'visible' : 'hidden'}" title="Default Payment Method Error" severity="error">
+                                        Because this customer account is designated as Auto-Pay, you must specify an Electronic Payment Method as the default.
+                                    </ui:message>
+                                    <ui:message class="{!v.autopayError ? 'visible' : 'hidden'}" title="Auto Pay Error" severity="error">
+                                        Because the latest Invoice Amount is less than $1000, you cannot disable Auto-Pay or remove default payment method.
+                                    </ui:message>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- / FORM STACKED -->
+                </div>
+
+            </div>
+            <div class="slds-modal__footer">
+                <lightning:button label="Cancel" aura:id="btnCancel" variant="neutral" onclick="{!c.doCancel}" />
+                <lightning:button label="Save" aura:id="btnSave" variant="brand" onclick="{!c.doSave}" />
+            </div>
+        </div>
+    </div>
+    <div aura:id="editaccountbackdrop" class="slds-backdrop slds-backdrop--open"></div>
+
+</aura:component>

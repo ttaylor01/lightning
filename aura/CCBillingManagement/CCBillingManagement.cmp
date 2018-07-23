@@ -1,0 +1,288 @@
+<aura:component controller="CCBillingManagement" extends="c:CCBillingUtility">
+    <aura:attribute name="uniquePageId" type="String" default="CCBM" />
+    <aura:attribute name="recordId" type="String" default="" />
+    <aura:attribute name="viewSelect" type="String" default="unpaid" />
+    <aura:attribute name="billingWrapper" type="CCBillingManagementWrapper" default="{'sobjectType':'CCBillingManagementWrapper'}"/>
+    <aura:attribute name="invoices" type="CCInvoiceWrapper[]"/>
+    <aura:attribute name="invoicePayments" type="CCInvoiceWrapper[]"/>
+    <aura:attribute name="pmTypes" type="List"/>
+    <aura:attribute name="makePaymentVisibility" type="Boolean" default="false" />
+    <aura:attribute name="paymentError" type="Boolean" default="false" />
+    <aura:attribute name="errorMsg" type="String" default="" />
+    <aura:attribute name="disableMakePayment" type="Boolean" default="true" />
+    <aura:attribute name="disableMakePaymentListBtn" type="Boolean" default="true" />
+
+    <aura:attribute name="invoicePageList" type="CCInvoiceWrapper[]"/>
+    <aura:attribute name="currentPage" type="Integer" description="The page number" default="1"/>
+    <aura:attribute name="numberPerPage" type="String" description="Number of records per page" default="10"/>
+    <aura:attribute name="numberOfPages" type="Integer" description="Number of pages"/>
+    <aura:attribute name="total" type="Integer" description="Total record count"/>
+    <aura:attribute name="next" type="Boolean" description="Indicates if there is next pages"/>
+    <aura:attribute name="prev" type="Boolean" description="Indicates if there is previous pages"/>
+	
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:registerEvent name="goToTarget" type="c:CCsObjectEvent"/>
+    <aura:handler event="aura:waiting" action="{!c.doWait}"/>
+    <aura:handler event="aura:doneWaiting" action="{!c.stopWait}"/>
+	
+    <lightning:spinner aura:id="spinner" variant="brand" size="large" class="slds-hide" alternativeText="Please wait while processing request..."/>
+
+    <!-- INVOICE List -->
+<div class="{!v.makePaymentVisibility ? 'hidden' : 'visible'}">
+    <div class="slds-col slds-size--1-of-1 slds-form--inline">
+        <div class="slds-page-header">
+            <!-- PAGE HEADER TOP ROW -->
+            <div class="slds-grid slds-wrap">
+                <!-- PAGE HEADER / ROW 1 / COLUMN 1 -->
+                <div class="slds-col slds-has-flexi-truncate">
+                    <!-- HEADING AREA -->
+                    <!-- MEDIA OBJECT = FIGURE + BODY -->
+                    <div class="slds-media slds-no-space slds-grow">
+                        <div class="slds-media__figure">
+                            <lightning:icon iconName="standard:contract_line_item" alternativeText="Invoices" class="slds-icon slds-icon-standard-case"/>
+                        </div>
+                        <div class="slds-media__body slds-media--center">
+                            <lightning:select aura:id="viewSelect" name="viewSelect" label="Invoices" value="{!v.viewSelect}" onchange="{!c.doSearch}">
+                                <option value="all">All</option>
+                                <option value="unpaid">UnPaid</option>
+                                <option value="paid">Paid</option>
+                            </lightning:select>
+<!--
+                            <p class="slds-text-titleDASHDASHcaps slds-line-heightDASHDASHreset">Invoices</p>
+                            <a onclick="{!c.backToAccount}" href="javascript:void(0);" class="slds-text-linkDASHDASHreset"><span class="slds-text-link">&laquo; Back to Account</span></a>
+-->
+                        </div>
+                    </div>
+                    <!-- / MEDIA OBJECT -->
+                    <!-- HEADING AREA -->
+                </div>
+                <!-- / PAGE HEADER / ROW 1 / COLUMN 1 -->
+                
+                <!-- PAGE HEADER / ROW 1 / COLUMN 2 -->
+                <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                    <div class="slds-button-group" role="group">
+                        <lightning:button label="View Payments" class="{!(v.makePaymentVisibility)?'hiddenColumn hide-button':'hiddenColumn'}" aura:id="btnViewPayments" disabled="false" variant="neutral" onclick="{!c.doViewPayments}" />
+                        <lightning:button label="Make Payment" class="{!(v.makePaymentVisibility)?'hiddenColumn hide-button':'hiddenColumn'}" aura:id="btnMakePaymentList" disabled="{!v.disableMakePaymentListBtn}" variant="neutral" onclick="{!c.setMakePaymentMode}" />
+                    </div>
+                </div>
+                <!-- / PAGE HEADER / ROW 1 / COLUMN 2 -->
+            </div>
+            <!-- / PAGE HEADER TOP ROW -->
+        </div>
+    </div>
+    <div class="slds-grid">
+        <div class="slds-scrollable">
+            <table class="slds-table slds-table--bordered slds-table--fixed-layout">
+                <thead>
+                    <tr class="slds-text-heading--label">
+                        <th class="hiddenColumn" scope="col" style="width:5%;">&nbsp;</th>
+                        <th class="" scope="col">Number</th>
+                        <th class="" scope="col">Balance</th>
+                        <th class="" scope="col">Due Date</th>
+                        <th class="hiddenColumn" scope="col">Invoice Date</th>
+                        <th class="hiddenColumn" scope="col">Status</th>
+                        <th class="hiddenColumn" scope="col">Total</th>
+                        <th class="hiddenColumn" scope="col">View Invoice</th>
+                    </tr>
+                </thead>
+                <tbody >
+                    <aura:iteration var="i" items="{!v.invoicePageList}" indexVar="idx">
+                        <tr class="slds-hint-parent" >
+                            <td class="slds-truncate hiddenColumn" style="width:5%;">
+                                <ui:inputCheckbox class="{!(i.isPayable)?'':'hidden'}" value="{!i.selected}"/>
+<!--
+                                <lightning:input type="checkbox" checked="{!i.selected}" />
+                                <input type="checkbox" checked="{!i.selected}" />
+-->
+                            </td>
+                            <td class="slds-truncate">
+                                <span>{!i.invoice.Name}</span>
+                            </td>
+                            <td class="slds-truncate">
+                                <span><ui:outputCurrency value="{!i.invoice.Zuora__Balance2__c}"/></span>
+<!--
+                                <span><lightning:formattedNumber value="{!i.invoice.Zuora__Balance2__c}" style="currency" currencyCode="USD" /></span>
+-->
+                            </td>
+                            <td class="{!i.isPastDue ? 'slds-truncate slds-text-color_error' : 'slds-truncate'}">
+                                <span>{!i.invoice.Zuora__DueDate__c}</span>
+                            </td>
+                            <td class="slds-truncate hiddenColumn">
+                                <span>{!i.invoice.Zuora__InvoiceDate__c}</span>
+                            </td>
+                            <td class="slds-truncate hiddenColumn">
+                                <span>{!i.invoice.Zuora__Status__c}</span>
+                            </td>
+                            <td class="slds-truncate hiddenColumn">
+                                <span><ui:outputCurrency value="{!i.invoice.Zuora__TotalAmount__c}"/></span>
+                            </td>
+                            <td class="slds-truncate hiddenColumn">
+                                <a href="javascript:void(0);" class="slds-text-link--reset" data-pk="{!i.invoice.Zuora__Zuora_Id__c}" onclick="{!c.onPDFClick}" >
+                                    <lightning:icon iconName="doctype:pdf" size="small" alternativeText="View Invoice PDF" class="slds-icon"/>
+                                </a>
+                            </td>
+                        </tr>
+                    </aura:iteration>
+                </tbody>
+            </table>
+            <table class="slds-table slds-table--bordered slds-table--fixed-layout hiddenColumn">
+                <thead>
+                    <tr class="slds-text-heading--label">
+                        <th class="hiddenColumn" scope="col" style="width:5%;">&nbsp;</th>
+                        <th class="" scope="col">TOTALS</th>
+                        <th class="" scope="col"><ui:outputCurrency value="{!v.billingWrapper.total.Zuora__Balance2__c}"/></th>
+                        <th class="hiddenColumn" scope="col">&nbsp;</th>
+                        <th class="hiddenColumn" scope="col">&nbsp;</th>
+                        <th class="hiddenColumn" scope="col">&nbsp;</th>
+                        <th class="hiddenColumn" scope="col"><ui:outputCurrency value="{!v.billingWrapper.total.Zuora__TotalAmount__c}"/></th>
+                        <th class="hiddenColumn" scope="col">&nbsp;</th>
+                    </tr>
+                </thead>
+            </table>
+
+            <div class="slds-form--inline slds-button-group slds-float--left slds-align--absolute-center slds-p-around--x-small" role="group">
+                <lightning:select aura:id="numberPerPage" name="numberPerPage" value="{!v.numberPerPage}" label="Records Per Page:" onchange="{!c.onSelectChange}">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </lightning:select>
+                <lightning:buttonIcon iconName="utility:chevronleft" size="small" variant="brand" alternativeText="Previous" onclick="{!c.previousPage}" disabled="{!v.prev}"/>
+                <span class="slds-assistive-text">Previous</span>
+                <lightning:buttonIcon iconName="utility:chevronright" size="small" variant="brand" alternativeText="Next" onclick="{!c.nextPage}" disabled="{!v.next}"/>
+                <span class="slds-assistive-text hiddenColumn">Next</span>
+                <span class="slds-text-title slds-p-horizontal--x-small hiddenColumn">{!v.total} Cases • page {!v.currentPage} / {!v.numberOfPages}</span>
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- / INVOICE LIST -->
+    <!-- / MAKE PAYMENT GRID -->
+    <div class="{!v.makePaymentVisibility ? 'slds-col visible' : 'slds-col hidden'}">
+        <!-- INVOICE Record Detail -->
+        <div class="slds-page-header">
+            <!-- PAGE HEADER TOP ROW -->
+            <div class="slds-grid">
+                <!-- PAGE HEADER / ROW 1 / COLUMN 1 -->
+                <div class="slds-col slds-has-flexi-truncate">
+                    <!-- HEADING AREA -->
+                    <!-- MEDIA OBJECT = FIGURE + BODY -->
+                    <div class="slds-media slds-no-space slds-grow">
+                        <div class="slds-media__figure">
+                            <lightning:icon iconName="standard:contract_line_item" alternativeText="Make Payment" class="slds-icon slds-icon-standard-case"/>
+                        </div>
+                        <div class="slds-media__body slds-media--center">
+                            <p class="slds-text-title--caps slds-line-height--reset">Make Payment</p>
+                        </div>
+                    </div>
+                    <!-- / MEDIA OBJECT -->
+                    <!-- HEADING AREA -->
+                </div>
+                <!-- / PAGE HEADER / ROW 1 / COLUMN 1 -->
+                <!-- PAGE HEADER / ROW 1 / COLUMN 2 -->
+                <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                    <div class="slds-button-group" role="group">
+                        <lightning:button label="Make Payment" aura:id="btnMakePayment" disabled="{!v.disableMakePayment}" variant="brand" onclick="{!c.doMakePayment}" />
+                        <lightning:button label="Cancel" aura:id="btnCancel" disabled="false" variant="neutral" onclick="{!c.doCancelMakePayment}" />
+                    </div>
+                </div>
+                <!-- / PAGE HEADER / ROW 1 / COLUMN 2 -->
+            </div>
+            <!-- / PAGE HEADER TOP ROW -->
+        </div>
+        <!-- / PAGE HEADER -->
+        <div class="slds-panel">
+            <!-- INPUT PAYMENTS -->
+            <div aura:id="inputPaymentValues" class="slds-panel__section">
+                <div class="slds-form--inline">
+                    <table class="slds-table slds-table--bordered slds-table--fixed-layout">
+                        <thead>
+                            <tr class="slds-text-heading--label">
+                                <th class="" scope="col">Number</th>
+                                <th class="" scope="col">Balance</th>
+                                <th class="hiddenColumn" scope="col">Due Date</th>
+                                <th class="hiddenColumn" scope="col">Invoice Date</th>
+                                <th class="hiddenColumn" scope="col">Status</th>
+                                <th class="hiddenColumn" scope="col">Total</th>
+                                <th class="hiddenColumn" scope="col">Payment Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody >
+                            <aura:iteration var="i" items="{!v.invoicePayments}" indexVar="idx">
+                                <tr class="slds-hint-parent" data-row="{!idx}" data-pk="{!i.Zuora__Zuora_Id__c}">
+                                    <td class="slds-truncate">
+                                        <span>{!i.invoice.Name}</span>
+                                    </td>
+                                    <td class="slds-truncate">
+                                        <span><ui:outputCurrency value="{!i.invoice.Zuora__Balance2__c}"/></span>
+                                    </td>
+                                    <td class="slds-truncate">
+                                        <span>{!i.invoice.Zuora__DueDate__c}</span>
+                                    </td>
+                                    <td class="slds-truncate">
+                                        <span>{!i.invoice.Zuora__InvoiceDate__c}</span>
+                                    </td>
+                                    <td class="slds-truncate">
+                                        <span>{!i.invoice.Zuora__Status__c}</span>
+                                    </td>
+                                    <td class="slds-truncate">
+                                        <span><ui:outputCurrency value="{!i.invoice.Zuora__TotalAmount__c}"/></span>
+                                    </td>
+                                    <td class="">
+                                        <ui:inputCurrency class="field" value="{!i.inputPaymentAmount}"/>
+                                        <!--
+                                        <lightning:input type="number" value="{!i.inputPaymentAmount}" formatter="currency"
+                                                         required="true" messageWhenValueMissing="Please enter a valid payment amount." 
+                                                         messageWhenBadInput="Please enter a valid payment amount." />
+-->                                        
+                                    </td>
+                                </tr>
+                            </aura:iteration>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- / INPUT PAYMENTS -->
+            <!-- INPUT PAYMENT METHOD -->
+            <div aura:id="inputPaymentValues" class="slds-panel__section slds-has-divider--bottom">
+                <div class="slds-grid ">
+                    <div class="slds-form slds-form_horizontal slds-size_1-of-1">
+                        <div class="slds-col">
+                            <fieldset aura:id="inputMakePaymentMethod" class="slds-form-element">
+                                <legend class="slds-form-element__legend slds-form-element__label">Payment Methods</legend>
+                                <div class="slds-form-element__control">
+                                    <aura:iteration var="pmtype" items="{!v.pmTypes}" indexVar="idx">
+                                        <span class="slds-radio">
+                                            <aura:if isTrue="{!pmtype.key != v.billingWrapper.paymentMethodId}">
+                                                <input type="radio" id="{!v.uniquePageId+pmtype.key}" name="makepaymentmethods" value="{!pmtype.key}" onclick="{!c.onMakePaymentMethodChange}" />
+                                            </aura:if>
+                                            <aura:if isTrue="{!pmtype.key == v.billingWrapper.paymentMethodId}">
+                                                <input type="radio" id="{!v.uniquePageId+pmtype.key}" name="makepaymentmethods" value="{!pmtype.key}" onclick="{!c.onMakePaymentMethodChange}" checked="checked" />
+                                            </aura:if>
+                                            <label class="slds-radio__label" for="{!v.uniquePageId+pmtype.key}">
+                                                <span class="slds-radio_faux" aura:id="{!v.uniquePageId+pmtype.key}"></span>
+                                                <span class="slds-form-element__label"><aura:unescapedHtml value="{!pmtype.value}" /></span>
+                                            </label>
+                                        </span>
+                                    </aura:iteration>
+                                    <div class="">
+                                        <a onclick="{!c.doManagePaymentMethods}" href="javascript:void(0);" class="slds-text-link--reset"><span class="slds-text-link">Add New Payment Method</span></a>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+                <div class="{!v.paymentError ? 'slds-grid slds-grid_align-center visible' : 'slds-grid slds-grid_align-center hidden'}">
+                    <ui:message class="slds-col slds-size_1-of-2" title="Payment Error" severity="error">
+                        <aura:unescapedHtml value="{!v.errorMsg}" />
+                    </ui:message>
+                </div>
+            </div>
+            <!-- / INPUT PAYMENT METHOD -->
+        </div>
+    </div>
+    <!-- / MAKE PAYMENT GRID -->
+
+</aura:component>

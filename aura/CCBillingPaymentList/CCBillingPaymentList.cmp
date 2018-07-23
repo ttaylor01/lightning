@@ -1,0 +1,108 @@
+<aura:component controller="CCBillingManagement" extends="c:CCBillingUtility">
+    <aura:attribute name="recordId" type="String" default="" />
+    <aura:attribute name="payments" type="Zuora__Payment__c[]"/>
+
+    <aura:attribute name="paymentPageList" type="Zuora__Payment__c[]"/>
+    <aura:attribute name="currentPage" type="Integer" description="The page number" default="1"/>
+    <aura:attribute name="numberPerPage" type="String" description="Number of records per page" default="10"/>
+    <aura:attribute name="numberOfPages" type="Integer" description="Number of pages"/>
+    <aura:attribute name="total" type="Integer" description="Total record count"/>
+    <aura:attribute name="next" type="Boolean" description="Indicates if there is next pages"/>
+    <aura:attribute name="prev" type="Boolean" description="Indicates if there is previous pages"/>
+	
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:registerEvent name="goToTarget" type="c:CCsObjectEvent"/>
+	
+    <lightning:spinner aura:id="spinner" variant="brand" size="large" class="slds-hide" alternativeText="Please wait while processing request..."/>
+
+<!-- TOP GRID -->
+<div class="slds-grid slds-wrap">
+
+    <!-- PAYMENT List -->
+    <div>
+        <div class="slds-col slds-size--1-of-1 slds-form--inline">
+            <div class="slds-page-header">
+                <!-- PAGE HEADER TOP ROW -->
+                <div class="slds-grid slds-wrap">
+                    <!-- PAGE HEADER / ROW 1 / COLUMN 1 -->
+                    <div class="slds-col slds-has-flexi-truncate">
+                        <!-- HEADING AREA -->
+                        <!-- MEDIA OBJECT = FIGURE + BODY -->
+                        <div class="slds-media slds-no-space slds-grow">
+                            <div class="slds-media__figure">
+                                <lightning:icon iconName="standard:product_item_transaction" alternativeText="Payments" class="slds-icon"/>
+                            </div>
+                            <div class="slds-media__body slds-media--center">
+                                <p class="slds-text-title--caps slds-line-height--reset">Payments</p>
+                                <a onclick="{!c.backToManageBilling}" href="javascript:void(0);" class="slds-text-link--reset"><span class="slds-text-link">&laquo; Back to Account</span></a>
+                            </div>
+                        </div>
+                        <!-- / MEDIA OBJECT -->
+                        <!-- HEADING AREA -->
+                    </div>
+                    <!-- / PAGE HEADER / ROW 1 / COLUMN 1 -->
+                    
+                    <!-- PAGE HEADER / ROW 1 / COLUMN 2 -->
+                    <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                    </div>
+                    <!-- / PAGE HEADER / ROW 1 / COLUMN 2 -->
+                </div>
+                <!-- / PAGE HEADER TOP ROW -->
+            </div>
+        </div>
+        <div class="slds-grid">
+            <div class="slds-scrollable">
+                <table class="slds-table slds-table--bordered slds-table--fixed-layout">
+                    <thead>
+                        <tr class="slds-text-heading--label">
+                            <th class="" scope="col" style="width:160px;">Payment Number</th>
+                            <th class="" scope="col" style="width:110px;">Amount</th>
+                            <th class="hiddenColumn" scope="col" style="width:110px;">Status</th>
+                            <th class="hiddenColumn" scope="col" style="width:160px;">Payment Date</th>
+                            <th class="hiddenColumn" scope="col">Payment Method</th>
+                        </tr>
+                    </thead>
+                    <tbody >
+                        <aura:iteration var="p" items="{!v.paymentPageList}" indexVar="idx">
+                            <tr class="slds-hint-parent" >
+                                <td class="slds-truncate" style="width:160px;">
+                                    <span>{!p.Name}</span>
+                                </td>
+                                <td class="slds-truncate" style="width:110px;">
+                                    <span><ui:outputCurrency value="{!p.Zuora__Amount__c}"/></span>
+                                </td>
+                                <td class="slds-truncate hiddenColumn" style="width:110px;">
+                                    <span>{!p.Zuora__Status__c}</span>
+                                </td>
+                                <td class="slds-truncate hiddenColumn" style="width:160px;">
+                                    <span><ui:outputDateTime value="{!p.Zuora__EffectiveDate__c}" format="M/d/yyyy"/></span>
+                                </td>
+                                <td class="slds-truncate hiddenColumn">
+                                    <span>{!p.Zuora__PaymentMethod__c}</span>
+                                </td>
+                            </tr>
+                        </aura:iteration>
+                    </tbody>
+                </table>
+                <div class="slds-form--inline slds-button-group slds-float--left slds-align--absolute-center slds-p-around--x-small" role="group">
+                    <lightning:select aura:id="numberPerPage" name="numberPerPage" value="{!v.numberPerPage}" label="Records Per Page:" onchange="{!c.onSelectChange}">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </lightning:select>
+                    <lightning:buttonIcon iconName="utility:chevronleft" size="small" variant="brand" alternativeText="Previous" onclick="{!c.previousPage}" disabled="{!v.prev}"/>
+                    <span class="slds-assistive-text">Previous</span>
+                    <lightning:buttonIcon iconName="utility:chevronright" size="small" variant="brand" alternativeText="Next" onclick="{!c.nextPage}" disabled="{!v.next}"/>
+                    <span class="slds-assistive-text hiddenColumn">Next</span>
+                    <span class="slds-text-title slds-p-horizontal--x-small hiddenColumn">{!v.total} Cases • page {!v.currentPage} / {!v.numberOfPages}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- / PAYMENT LIST -->
+
+</div>
+
+</aura:component>
