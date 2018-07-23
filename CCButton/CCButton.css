@@ -1,0 +1,79 @@
+.THIS.ccBtnWrapper button {
+    width: 100%;
+    border-radius: .125rem;
+    padding: 14px;
+    background-color: rgb(34, 97, 181);
+    border: none;
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 16px;
+    -webkit-transition: all .8s ease;
+    transition: all .8s ease;
+    text-transform: uppercase;
+    font-family: Arial;
+}
+
+.THIS .ccBtn{
+/*
+  padding: 14px !important;
+  height: auto !important;
+*/
+  width: 100% !important;
+}
+
+.THIS .ccBtnBlue{
+	color: #ffffff !important;
+	background-color: #2261b5 !important;
+}
+.THIS .ccBtnNeutral{
+	color: #2261b5 !important;
+    border: 2px solid #e8ebeb !important;
+    background-color: #ffffff !important;
+}
+.THIS .ccBtnInverse{
+	color: #e8ebeb !important;
+    border: 2px solid #e8ebeb !important;
+    background-color: #ffffff !important;
+}
+.THIS .ccBtnGrey{
+	color: #333333 !important;
+	background-color: #e8ebeb !important;
+}
+.THIS .ccBtnOrange{
+	color: #ffffff !important;
+	background-color: #ed5624 !important;
+}
+.THIS .ccBtnGreen{
+    color: #ffffff !important;
+	background-color: #02a17c !important;
+}
+.THIS .ccBtnYellow{
+	color: #4d4f53 !important;
+	background-color: #ffda00 !important;
+}
+.THIS .ccBtnRed{
+	color: #ffffff !important;
+	background-color: #b21909 !important;
+}
+
+.THIS .disabled{
+  background-color: #c2cacf !important;
+  cursor: default !important;
+  pointer-events: none;
+}
+
+.THIS .disabled:hover{
+  background-color: #c2cacf !important;
+  cursor: default !important;
+  pointer-events: none;
+}
+
+.THIS .disabled:focus{
+  background-color: #c2cacf !important;
+  cursor: default !important;
+  pointer-events: none;
+}
+
+.THIS .toggle {
+    display: none !important;
+}

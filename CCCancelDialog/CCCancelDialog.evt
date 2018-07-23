@@ -1,0 +1,4 @@
+<aura:event type="COMPONENT" 
+            description="Raise when user cancels a modal dialog">
+    <aura:attribute name="recordId" type="String"/>
+</aura:event>

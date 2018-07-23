@@ -1,0 +1,5 @@
+<design:component label="Custom Community Button">
+    <design:attribute name="btnText" label="Button Text" description="Button text" />
+    <design:attribute name="endpoint"   label="Button Endpoint" description="Button URL" />
+    <design:attribute name="btnVariation"   label="Button Variation" description="Options are Brand(default), Neutral, Destructive, Success and Inverse" />
+</design:component>

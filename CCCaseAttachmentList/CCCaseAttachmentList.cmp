@@ -1,0 +1,87 @@
+<aura:component controller="CCCaseAttachment" access="global" extends="c:CCDataComponent">
+    <aura:attribute name="recordId" type="String" default="" />
+    <aura:attribute name="siteUrlPrefix" type="String" default="" />
+    <aura:attribute name="viewFileURL" type="String" default="" />
+    <aura:attribute name="caseStatus" type="String" default="New" />
+    <aura:attribute name="attachments" type="Attachment[]"/>
+    <aura:attribute name="addBtnVisibility" type="Boolean" default="false" />
+
+    <aura:handler name="init" 
+                  value="{!this}" 
+                  action="{!c.doInit}"/>
+    <aura:handler name="hideAddAttachmentDialog" event="c:CCCancelDialog" action="{!c.hideAddAttachmentDialog}"/>
+    <aura:handler name="refreshList" event="c:CCsObjectEvent" action="{!c.doInit}"/>
+    <aura:registerEvent name="showSpinner" type="c:CCWaiting"/>
+    <aura:registerEvent name="hideSpinner" type="c:CCDoneWaiting"/>
+
+<div aura:id="addattachmentModal" class="hide-modal">
+    <c:CCAddAttachment aura:id="addAttachmentCmp" recordId="{!v.recordId}" />
+</div>
+    
+    <!-- COMMENT section -->
+    <div class="slds-grid slds-m-top--large">
+        <div class="slds-col">
+            
+            <article class="slds-card">
+                
+                <div class="slds-card__header slds-grid">
+                    <header class="slds-media slds-media--center slds-has-flexi-truncate">
+                        <div class="slds-media__figure">
+                            <lightning:icon iconName="standard:file" alternativeText="Attachment" class="slds-icon slds-icon-standard-case"/>
+                        </div>
+                        <div class="slds-media__body slds-truncate hiddenColumn">
+                            <a href="javascript:void(0);" class="slds-text-link--reset">
+                                <span class="slds-text-heading--small">Attachments</span>
+                            </a>
+                        </div>
+                    </header>
+                    <div class="slds-no-flex">
+                        <div class="slds-button-group" role="group">
+                            <lightning:button label="Add Attachment" class="{!(v.addBtnVisibility)?'':'hide-button'}" aura:id="btnAddAttachment" variant="neutral" onclick="{!c.showAddAttachmentDialog}" />
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- CARD BODY = TABLE -->
+                <div class="slds-card__body">
+                    <table class="slds-table slds-table--bordered slds-no-row-hover slds-table--cell-buffer">
+                        <thead>
+                            <tr class="slds-text-heading--label">
+                                <th class="slds-size--1-of-4" scope="col">Action</th>
+                                <th class="slds-size--1-of-4" scope="col">File Name</th>
+                                <th class="slds-size--1-of-4 hiddenColumn" scope="col">Last Modified</th>
+                                <th class="slds-size--1-of-4 hiddenColumn" scope="col">Created By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <aura:iteration items="{!v.attachments}" var="a">
+                                <tr class="slds-hint-parent">
+                                    <th class="slds-size--1-of-4" scope="row">
+                                        <a href="{!v.viewFileURL + a.Id}" target="_blank">View</a>
+<!--
+                                        <a href="{!'/success/servlet/servlet.FileDownload?file=' + a.Id}" target="_blank">View</a>
+                                        |<a  onclick="{!c.doDelete}" data-pk="{!a.Id}" href="javascript:void(0);"> Del</a>
+-->
+                                    </th>
+                                    <td class="slds-size--1-of-4">{!a.Name}</td>
+                                    <td class="slds-size--1-of-4 hiddenColumn">
+                                        <ui:outputDateTime value="{!a.LastModifiedDate}" format="M/d/yyyy h:mm a"/>
+                                    </td>
+                                    <td class="slds-size--1-of-4 hiddenColumn">{!a.CreatedBy.Name}</td>
+                                </tr>
+                            </aura:iteration>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- / CARD BODY = SECTION + TABLE -->
+<!--
+                <div class="slds-card__footer">
+                    <a href="javascript:void(0);">View All <span class="slds-assistive-text">attachments</span></a>
+                </div>
+-->
+            </article>
+        </div>
+    </div>
+    <!-- / COMMENT section -->
+
+</aura:component>

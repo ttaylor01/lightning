@@ -1,0 +1,84 @@
+<aura:component controller="CCCaseComment" access="global" extends="c:CCDataComponent">
+    <aura:attribute name="recordId" type="String" default="" />
+    <aura:attribute name="caseStatus" type="String" default="New" />
+    <aura:attribute name="casecomments" type="CaseComment[]"/>
+    <aura:attribute name="addBtnVisibility" type="Boolean" default="false" />
+
+    <aura:handler name="init" 
+                  value="{!this}" 
+                  action="{!c.doInit}"/>
+    <!-- Event handlers -->
+    <aura:handler name="hideAddCommentDialog" event="c:CCCancelDialog" action="{!c.hideAddCommentDialog}"/>
+
+<div aura:id="addcommentModal" class="hide-modal">
+    <c:CCAddComment aura:id="addCommentCmp" recordId="{!v.recordId}" />
+</div>
+
+    <!-- COMMENT section -->
+    <div class="slds-grid slds-m-top--large">
+        <div class="slds-col">
+            
+            <article class="slds-card">
+                
+                <div class="slds-card__header slds-grid">
+                    <header class="slds-media slds-media--center slds-has-flexi-truncate">
+                        <div class="slds-media__figure">
+                            <lightning:icon iconName="standard:case_comment" alternativeText="Comment" class="slds-icon slds-icon-standard-case"/>
+                        </div>
+                        <div class="slds-media__body slds-truncate hiddenColumn">
+                            <a href="javascript:void(0);" class="slds-text-link--reset">
+                                <span class="slds-text-heading--small">Comments</span>
+                            </a>
+                        </div>
+                    </header>
+                    <div class="slds-no-flex">
+                        <div class="slds-button-group" role="group">
+                            <lightning:button label="Add Comment" class="{!(v.addBtnVisibility)?'':'hide-button'}" aura:id="btnAddComment" variant="neutral" onclick="{!c.showAddCommentDialog}" />
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- CARD BODY = TABLE -->
+                <div class="slds-card__body">
+                    <table class="slds-table slds-table--bordered slds-no-row-hover slds-table--cell-buffer">
+                        <thead>
+                            <tr class="slds-text-heading--label">
+                                <th class="slds-size--1-of-1" scope="col">Comment</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <aura:iteration items="{!v.casecomments}" var="casecomment">
+                                <tr class="slds-hint-parent">
+                                    <th class="slds-size--1-of-1 slds-cell-wrap" scope="row">
+                                        <span style="font-weight:bold">Created By: {!casecomment.CreatedBy.Name} (<ui:outputDateTime value="{!casecomment.CreatedDate}" format="M/d/yyyy h:mm a"/>)</span><br/>
+                                        <div class="slds-container--large">
+                                            <ui:outputText value="{!casecomment.CommentBody}" />
+                                        </div>
+                                    </th>
+                                    <td class="slds-cell-shrink"></td>
+<!--
+                                    <td class="slds-cell-shrink">
+                                        <button class="slds-button slds-buttonDASHDASHicon-border-filled slds-buttonDASHDASHicon-x-small" title="Show More">
+                                            <lightning:icon iconName="utility:down" size="x-small" alternativeText="Show More" class="slds-button__icon slds-button__iconDASHDASHhint"/>
+                                            <span class="slds-assistive-text">Show More</span>
+                                        </button>
+                                    </td>
+-->
+                                </tr>
+                            </aura:iteration>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- / CARD BODY = SECTION + TABLE -->
+<!--
+                <div class="slds-card__footer">
+                    <a href="javascript:void(0);">View All <span class="slds-assistive-text">attachments</span></a>
+                </div>
+-->
+            </article>
+        </div>
+    </div>
+    <!-- / COMMENT section -->
+
+</aura:component>
