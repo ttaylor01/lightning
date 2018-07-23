@@ -1,0 +1,12 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global">
+    <aura:attribute name="endpoint" type="String"  required="true"/>
+    <aura:attribute name="btnText" type="String"  required="true" default="Button Text"/>
+    <aura:attribute name="btnVariation" type="String"  required="false" default="Brand"/>
+
+    <div class="ccBtnWrapper">
+        <button  aura:id ="ccButton" id="ccButton" class="slds-button ccBtn" onclick="{!c.navigate}">
+            <span class=" label bBody truncate" dir="ltr" data-aura-rendered-by="42:2;a">{!v.btnText}</span>
+        </button>
+    </div>
+
+</aura:component>
