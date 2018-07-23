@@ -1,0 +1,67 @@
+<aura:component controller="CCBillingPaymentMethod" access="global" extends="c:CCBillingUtility">
+    <aura:attribute name="recordId" type="String" default="" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:method name="refresh" action="{!c.doInit}" access="PUBLIC" description="Invokes doInit() method" />
+    <aura:registerEvent name="cancelTermsAndAgreementDialog" type="c:CCCancelDialog"/>
+    <aura:registerEvent name="agreeToTermsAndAgreementDialog" type="c:CCCancelDialog"/>
+
+    <div aura:id="closedialog" role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+            <div class="slds-modal__header">
+                <lightning:buttonIcon class="slds-modal__close" 
+                                      iconName="utility:close" 
+                                      size="medium" 
+                                      variant="bare-inverse" 
+                                      alternativeText="Close" 
+                                      onclick="{!c.doCancel}"/> 
+                
+                <h3 class="slds-text-heading--medium">Availity, LLC and all subsidiaries</h3>
+            </div>
+            
+            <div class="slds-modal__content slds-p-around--medium">
+                
+                <div class="slds-panel slds-grid slds-grid--vertical slds-nowrap">
+                    <div class="slds-form--stacked slds-grow slds-scrollable">
+                        <div class="slds-panel__section slds-has-divider--bottom">
+                            <div class="slds-text-body_regular text-color-primary">
+                                AUTHORIZATION AGREEMENT FOR AUTOMATIC WITHDRAWAL OF PAYMENTS
+                            </div>
+                        </div>
+                        <!-- MAY NEED TO HAVE SEPARATE COMPONENTS HERE FOR EACH ARTICLE TYPE -->
+                        <div class="slds-panel__section">
+                            <div class="">
+The below named subscriber (“Subscriber”) hereby authorizes Availity, LLC and its subsidiaries, 
+designees, successors and assignees (collectively, “Availity”) to (1) charge to Subscriber’s credit card 
+and/or (2) electronically withdraw via an ACH debit from the Subscriber’s bank account set forth below, 
+any payments or other fees contemplated in the Subscription Agreement between Availity and Subscriber 
+(collectively, “Payments”). Such Payments include, but are not limited to, any installation fees,  
+monthly or recurring fees, transactional fees, late fees, and any fees Availity incurs due to Subscriber’s bank’s 
+failure to honor any credit card or ACH request, as applicable. This authorization by Subscriber is to remain in 
+full force and effect until Availity has received written notice from Subscriber of its termination in such time 
+and in such manner as to afford Availity a reasonable opportunity to act. If Subscriber pays by written check, 
+Availity reserves the right to convert such check into an ACH request and debit the account upon which the check was issued. 
+A payment (whether paid by debit or other means) that is not honored by the Subscriber’s bank for any reason will 
+be subject to a $35.00 service fee imposed by Availity, the amount of which may also be charged to Subscriber’s 
+credit card or debited from Subscriber’s bank account, as applicable.  Subscriber represents and warrants that 
+all credit card and/or banking information provided to Availity is accurate and complete, and Subscriber shall 
+provide Availity with timely notice of any changes to such information.  Subscriber acknowledges that the origination 
+of ACH transactions, if any, to its account must comply with any applicable provisions of U.S. law.                            </div>
+                        </div>
+                        <!-- / MAY NEED TO HAVE SEPARATE COMPONENTS HERE FOR EACH ARTICLE TYPE -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slds-modal__footer">
+                <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                    <div class="slds-button-group" role="group">
+                        <lightning:button label="Agree" class="" aura:id="btnAgree" name="btnAgree" disabled="false" variant="brand" onclick="{!c.doAgree}" />
+                        <lightning:button label="Cancel" aura:id="btnCancel" name="btnCancel" disabled="false" variant="neutral" onclick="{!c.doCancel}" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div aura:id="closecasebackdrop" class="slds-backdrop slds-backdrop--open"></div>
+
+</aura:component>

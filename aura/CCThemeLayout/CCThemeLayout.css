@@ -1,0 +1,15 @@
+.THIS {
+    position: relative;
+    z-index: 1;
+}
+.THIS .customHeader {
+    background-color: token(darkBackgroundColor);
+    height: 85px;
+/*
+    background-image: url('https://availity--qa.cs18.my.salesforce.com/resource/1423854624000/acs_CommunityLoginBkgd');
+*/
+}
+.THIS .logoContainer {
+    width: 100%;
+    height: auto;
+}

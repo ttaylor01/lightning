@@ -1,0 +1,33 @@
+<aura:component implements="forceCommunity:themeLayout" access="global" description="Sample Custom Theme Layout">
+    <aura:attribute name="profileMenu" type="Aura.Component[]" required="false"/>
+    <aura:attribute name="navBar" type="Aura.Component[]" required="false"/>
+    <aura:attribute name="logoComp" type="Aura.Component[]" required="false"/>
+    <aura:attribute name="footer" type="Aura.Component[]" />
+
+    <div class="slds">
+        <div class="slds-grid slds-grid_vertical-align-center slds-wrap customHeader">
+            <div class="slds-size_1-of-4 slds-p-left_xx-large">
+                    <div class="logoContainer slds-p-top_small slds-p-bottom_small">
+                        <img src="{!$Resource.CCAvailityLogo_White}" />
+                    </div>
+            </div>
+            <div class="slds-size_3-of-4 slds-grid slds-wrap">
+                <div class="slds-size_2-of-3">
+                </div>
+                <div class="slds-size_1-of-3 slds-float_right">
+                    {!v.profileMenu}
+                </div>
+            </div>
+            <div class="slds-size_1-of-1">
+                {!v.navBar}
+            </div>
+        </div>
+        <div class="mainContentArea">
+            {!v.body}
+        </div>
+        <footer id="footer">
+            {!v.footer}
+        </footer>
+    </div>
+
+</aura:component>

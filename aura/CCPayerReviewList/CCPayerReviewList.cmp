@@ -1,0 +1,236 @@
+<aura:component controller="CCPayerReviewList" extends="c:CCPayerReviewUtility">
+    <aura:attribute name="searchStr" type="String" default="" />
+    <aura:attribute name="viewSelect" type="String" default="Open" />
+    <!-- Pagination attributes -->
+    <aura:attribute name="cases" type="Case[]"/>
+    <aura:attribute name="allCases" type="Case[]"/>
+    <aura:attribute name="page" type="Integer" description="The page number" default="1"/>
+    <aura:attribute name="pages" type="Integer" description="Number of pages"/>
+    <aura:attribute name="total" type="Integer" description="Total record count"/>
+    <aura:attribute name="next" type="Boolean" description="Indicates if there is next pages"/>
+    <aura:attribute name="prev" type="Boolean" description="Indicates if there is previous pages"/>
+    <aura:attribute name="pageSize" type="String" description="Number of records per page" default="10"/>
+    <aura:attribute name="selectedRecordId" type="String" access="PRIVATE" description="The currently selected record id" default=""/>
+    <aura:attribute name="selectedRowEl" type="Object" access="PRIVATE" description="The currently selected record element" default=""/>
+    <aura:attribute name="selectedColEl" type="Object" access="PRIVATE" description="The currently selected column element" default=""/>
+    <aura:attribute name="arrowDirection" type="string" default="arrowdown" description="Use for change arrow sign direction on header based on click"/>
+    <aura:attribute name="isAsc" type="boolean" default="false" description="boolean flag for pass sorting condition to apex class"/> 
+    <aura:attribute name="selectedTabsoft" type="string" default="CreatedDate" description="Use for show/hide arraow sign on header based on conditions"/>
+    <!-- Handle component initialization in a client-side controller -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:registerEvent name="caseSearch" type="c:CCCaseSearch"/>
+    <aura:registerEvent name="goToTarget" type="c:CCsObjectEvent"/>
+
+    <aura:method name="refresh" action="{!c.doInit}" access="PUBLIC" description="Re-invokes doInit() method" />
+
+    <lightning:spinner aura:id="spinner" variant="brand" size="large" class="slds-hide" alternativeText="Please wait while processing request..."/>
+
+    <!-- PAGE HEADER -->
+    <div class="slds-form--inline">
+        <div class="slds-page-header">
+            <!-- PAGE HEADER TOP ROW -->
+            <div class="slds-grid">
+                <div class="slds-col slds-no-flex slds-align-top slds-size--1-of-1">
+                        <h2 class="slds-text-heading--small slds-m-bottom--medium">Availity Client Services Support Tickets</h2>
+                </div>
+            </div>
+            <div class="slds-grid slds-wrap">
+                <!-- PAGE HEADER / ROW 1 / COLUMN 1 -->
+                <div class="slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-3">
+                    <!-- HEADING AREA -->
+                    <!-- MEDIA OBJECT = FIGURE + BODY -->
+                    <div class="slds-media slds-no-space slds-grow">
+                        <div class="slds-media__figure">
+                            <lightning:icon iconName="standard:note" alternativeText="Ticket" class="slds-icon slds-icon-standard-case"/>
+                        </div>
+                        <div class="slds-media__body slds-media--center">
+                            <lightning:select aura:id="viewSelect" name="viewSelect" label="View" value="{!v.viewSelect}" onchange="{!c.doSearch}">
+                                <option value="All">All Tickets</option>
+                                <option value="Open">My Open Tickets</option>
+                                <option value="Closed">My Closed Tickets</option>
+                                <option value="Archived">My Archived Tickets</option>
+                            </lightning:select>
+                        </div>
+                    </div>
+                    <!-- / MEDIA OBJECT -->
+                    <!-- HEADING AREA -->
+                </div>
+                <!-- / PAGE HEADER / ROW 1 / COLUMN 1 -->
+
+                <!-- PAGE HEADER / ROW 1 / COLUMN 2 -->
+                <div class="slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-3">
+                    <div class="slds-button-group" role="group">
+                        <lightning:button label="Download" iconName="utility:download" iconPosition="left" name="btnDownload" aura:id="btnDownload" disabled="false" variant="neutral" onclick="{!c.doDownLoadCSV}" />
+                    </div>
+                </div>
+                <!-- / PAGE HEADER / ROW 1 / COLUMN 2 -->
+
+                <!-- PAGE HEADER / ROW 1 / COLUMN 3 -->
+                <div class="slds-size--1-of-1 slds-large-size--1-of-3">
+                    <lightning:layout >
+                        <lightning:layoutItem >
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--right">
+                                    <a  onclick="{!c.resetSearch}" href="javascript:void(0);"><lightning:icon iconName="utility:clear" size="x-small" alternativeText="Clear" class="slds-input__icon slds-icon--x-small slds-icon-text-default"/></a>
+                                    <ui:inputText aura:id="searchStr"
+                                                  placeholder="search keywords..."
+                                                  value="{!v.searchStr}"
+                                                  keyup="{!c.doSearch}" 
+                                                  updateOn="keyup"
+                                                  />
+                                </div>
+                            </div>
+                        </lightning:layoutItem>
+                        <lightning:layoutItem padding="horizontal-small">
+                            <lightning:button label="Search" aura:id="btnSearch" disabled="false" variant="brand" onclick="{!c.doSearch}" />
+                        </lightning:layoutItem>
+                    </lightning:layout>
+                </div>
+                <!-- / PAGE HEADER / ROW 1 / COLUMN 3 -->
+            </div>
+            <!-- / PAGE HEADER TOP ROW -->
+        </div>
+    </div>
+    <!-- / PAGE HEADER -->
+
+<div class="slds-grid">
+
+    <div class="slds-scrollable caselist">
+        <table class="slds-table slds-table--bordered slds-table--fixed-layout">
+            <thead>
+                <tr class="slds-text-heading--label">
+                    <th class="slds-is-sortable" scope="col" data-row="CaseNumber" onclick="{!c.sortRow}" style="width:110px;">
+                        <a class="slds-th__action slds-text-link--reset" href="javascript:void(0);" tabindex="0">
+                            <span class="slds-assistive-text">Sort </span>
+                            <span class="slds-truncate" title="Ticket">Ticket</span>
+                            <aura:if isTrue="{! and(v.arrowDirection == 'arrowdown', v.selectedTabsoft == 'CaseNumber') }">
+                                <lightning:icon iconName="utility:arrowdown" size="x-small" alternativeText="Sort" class="slds-icon slds-icon--x-small slds-icon-text-default slds-is-sortable__icon"/>
+                            </aura:if>
+                            <aura:if isTrue="{! and(v.arrowDirection != 'arrowdown', v.selectedTabsoft == 'CaseNumber') }">
+                                <lightning:icon iconName="utility:arrowup" size="x-small" alternativeText="Sort" class="slds-icon slds-icon--x-small slds-icon-text-default slds-is-sortable__icon"/>
+                            </aura:if>     
+                        </a>
+                    </th>
+                    <th class="slds-is-sortable " scope="col" data-row="Status" onclick="{!c.sortRow}" style="width:110px;">
+                        <a class="slds-th__action slds-text-link--reset" href="javascript:void(0);" tabindex="0">
+                            <span class="slds-assistive-text">Sort </span>
+                            <span class="slds-truncate" title="Status">Status</span>
+                            <aura:if isTrue="{! and(v.arrowDirection == 'arrowdown', v.selectedTabsoft == 'Status') }">
+                                <lightning:icon iconName="utility:arrowdown" size="x-small" alternativeText="Sort" class="slds-icon slds-icon--x-small slds-icon-text-default slds-is-sortable__icon"/>
+                            </aura:if>
+                            <aura:if isTrue="{! and(v.arrowDirection != 'arrowdown', v.selectedTabsoft == 'Status') }">
+                                <lightning:icon iconName="utility:arrowup" size="x-small" alternativeText="Sort" class="slds-icon slds-icon--x-small slds-icon-text-default slds-is-sortable__icon"/>
+                            </aura:if>     
+                        </a>
+                    </th>
+                    <th class="slds-is-sortable hiddenColumn slds-is-sorted" scope="col" data-row="CreatedDate" onclick="{!c.sortRow}">
+                        <a class="slds-th__action slds-text-link--reset" href="javascript:void(0);" tabindex="0">
+                            <span class="slds-assistive-text">Sort </span>
+                            <span class="slds-truncate" title="Date/Time Opened">Date Opened</span>
+                            <aura:if isTrue="{! and(v.arrowDirection == 'arrowdown', v.selectedTabsoft == 'CreatedDate') }">
+                                <lightning:icon iconName="utility:arrowdown" size="x-small" alternativeText="Sort" class="slds-icon slds-icon--x-small slds-icon-text-default slds-is-sortable__icon"/>
+                            </aura:if>
+                            <aura:if isTrue="{! and(v.arrowDirection != 'arrowdown', v.selectedTabsoft == 'CreatedDate') }">
+                                <lightning:icon iconName="utility:arrowup" size="x-small" alternativeText="Sort" class="slds-icon slds-icon--x-small slds-icon-text-default slds-is-sortable__icon"/>
+                            </aura:if>     
+                        </a>
+                    </th>
+                    <th class="slds-is-sortable hiddenColumn" scope="col" data-row="LastModifiedDate" onclick="{!c.sortRow}" style="width:200px;">
+                        <a class="slds-th__action slds-text-link--reset" href="javascript:void(0);" tabindex="0">
+                            <span class="slds-assistive-text">Sort </span>
+                            <span class="slds-truncate" title="Last Modified Date">Last Modified</span>
+                            <aura:if isTrue="{! and(v.arrowDirection == 'arrowdown', v.selectedTabsoft == 'LastModifiedDate') }">
+                                <lightning:icon iconName="utility:arrowdown" size="x-small" alternativeText="Sort" class="slds-icon slds-icon--x-small slds-icon-text-default slds-is-sortable__icon"/>
+                            </aura:if>
+                            <aura:if isTrue="{! and(v.arrowDirection != 'arrowdown', v.selectedTabsoft == 'LastModifiedDate') }">
+                                <lightning:icon iconName="utility:arrowup" size="x-small" alternativeText="Sort" class="slds-icon slds-icon--x-small slds-icon-text-default slds-is-sortable__icon"/>
+                            </aura:if>     
+                        </a>
+                    </th>
+                    <th class="slds-is-sortable" scope="col" data-row="Call_Reason__c" onclick="{!c.sortRow}">
+                        <a class="slds-th__action slds-text-link--reset" href="javascript:void(0);" tabindex="0">
+                            <span class="slds-assistive-text">Sort </span>
+                            <span class="slds-truncate" title="Reason">Reason</span>
+                            <aura:if isTrue="{! and(v.arrowDirection == 'arrowdown', v.selectedTabsoft == 'Call_Reason__c') }">
+                                <lightning:icon iconName="utility:arrowdown" size="x-small" alternativeText="Sort" class="slds-icon slds-icon--x-small slds-icon-text-default slds-is-sortable__icon"/>
+                            </aura:if>
+                            <aura:if isTrue="{! and(v.arrowDirection != 'arrowdown', v.selectedTabsoft == 'Call_Reason__c') }">
+                                <lightning:icon iconName="utility:arrowup" size="x-small" alternativeText="Sort" class="slds-icon slds-icon--x-small slds-icon-text-default slds-is-sortable__icon"/>
+                            </aura:if>     
+                        </a>
+                    </th>
+                    <th class="slds-is-sortable hiddenColumn" scope="col" data-row="Payer_Ticket_Number__c" onclick="{!c.sortRow}">
+                        <a class="slds-th__action slds-text-link--reset" href="javascript:void(0);" tabindex="0">
+                            <span class="slds-assistive-text">Sort </span>
+                            <span class="slds-truncate" title="My Tracking Number">Payer Tracking Number</span>
+                            <aura:if isTrue="{! and(v.arrowDirection == 'arrowdown', v.selectedTabsoft == 'Payer_Ticket_Number__c') }">
+                                <lightning:icon iconName="utility:arrowdown" size="x-small" alternativeText="Sort" class="slds-icon slds-icon--x-small slds-icon-text-default slds-is-sortable__icon"/>
+                            </aura:if>
+                            <aura:if isTrue="{! and(v.arrowDirection != 'arrowdown', v.selectedTabsoft == 'Payer_Ticket_Number__c') }">
+                                <lightning:icon iconName="utility:arrowup" size="x-small" alternativeText="Sort" class="slds-icon slds-icon--x-small slds-icon-text-default slds-is-sortable__icon"/>
+                            </aura:if>     
+                        </a>
+                    </th>
+                    <th class="slds-is-sortable hiddenColumn" scope="col" data-row="Owner.Name" onclick="{!c.sortRow}">
+                        <a class="slds-th__action slds-text-link--reset" href="javascript:void(0);" tabindex="0">
+                            <span class="slds-assistive-text">Sort </span>
+                            <span class="slds-truncate" title="Ticket Owner">Ticket Owner</span>
+                            <aura:if isTrue="{! and(v.arrowDirection == 'arrowdown', v.selectedTabsoft == 'Owner.Name') }">
+                                <lightning:icon iconName="utility:arrowdown" size="x-small" alternativeText="Sort" class="slds-icon slds-icon--x-small slds-icon-text-default slds-is-sortable__icon"/>
+                            </aura:if>
+                            <aura:if isTrue="{! and(v.arrowDirection != 'arrowdown', v.selectedTabsoft == 'Owner.Name') }">
+                                <lightning:icon iconName="utility:arrowup" size="x-small" alternativeText="Sort" class="slds-icon slds-icon--x-small slds-icon-text-default slds-is-sortable__icon"/>
+                            </aura:if>     
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody >
+                <aura:iteration var="case" items="{!v.cases}" indexVar="idx">
+                    <tr class="slds-hint-parent" data-row="{!idx}" data-pk="{!case.Id}" onclick="{!c.onListItemClick}" >
+                        <td class="slds-truncate" data-label="{!case.CaseNumber}" style="width:110px;">
+                            <span>{!case.CaseNumber}</span>
+                        </td>
+                        <td class="slds-truncate" data-label="{!case.Status}" style="width:110px;">
+                            <span>{!case.Status}</span>
+                        </td>
+                        <td class="slds-truncate hiddenColumn" data-label="{!case.CreatedDate}">
+                            <span><ui:outputDateTime value="{!case.CreatedDate}" format="M/d/yyyy"/></span>
+                        </td>
+                        <td class="slds-truncate hiddenColumn" data-label="{!case.LastModifiedDate}" style="width:200px;">
+                            <span><ui:outputDateTime value="{!case.LastModifiedDate}" format="M/d/yyyy hh:mm a"/></span>
+                        </td>
+                        <td class="slds-truncate" data-label="{!case.Call_Reason__c}">
+                            <span>{!case.Call_Reason__c}</span>
+                        </td>
+                        <td class="slds-truncate hiddenColumn" data-label="{!case.Payer_Ticket_Number__c}">
+                            <span>{!case.Payer_Ticket_Number__c}</span>
+                        </td>
+                        <td class="slds-truncate hiddenColumn" data-label="{!case.Contact.Name}">
+                            <span>{!case.Contact.Name}</span>
+                        </td>
+                    </tr>
+                </aura:iteration>
+            </tbody>
+        </table>
+
+        <div class="slds-form--inline slds-button-group slds-float--left slds-align--absolute-center slds-p-around--x-small" role="group">
+            <lightning:select aura:id="pageSize" name="pageSize" value="{!v.pageSize}" label="Records Per Page:" onchange="{!c.onSelectChange}">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </lightning:select>
+            <lightning:buttonIcon iconName="utility:chevronleft" size="small" variant="brand" alternativeText="Previous" onclick="{!c.previousPage}" disabled="{!v.prev}"/>
+            <span class="slds-assistive-text">Previous</span>
+            <lightning:buttonIcon iconName="utility:chevronright" size="small" variant="brand" alternativeText="Next" onclick="{!c.nextPage}" disabled="{!v.next}"/>
+            <span class="slds-assistive-text hiddenColumn">Next</span>
+            <span class="slds-text-title slds-p-horizontal--x-small hiddenColumn">{!v.total} Cases • page {!v.page} / {!v.pages}</span>
+        </div>
+
+    </div>
+
+</div>    
+
+</aura:component>

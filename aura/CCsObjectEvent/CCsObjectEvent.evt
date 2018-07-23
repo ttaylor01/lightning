@@ -1,0 +1,5 @@
+<aura:event type="COMPONENT" description="Navigate to sObject Component" >
+    <aura:attribute name="sObjectId" type="Id" required="false" description="The Id of the selected SObject." />
+    <aura:attribute name="listView" type="String" required="false" description="The list view for the SObject list." />
+    <aura:attribute name="targetView" type="String" required="false" description="The name of the component view:  List, Detail, Edit." />
+</aura:event>

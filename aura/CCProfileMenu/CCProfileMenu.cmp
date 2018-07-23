@@ -1,0 +1,19 @@
+<aura:component controller="CCProfileMenu" implements="forceCommunity:profileMenuInterface" access="global" extends="c:CCDataComponent">
+    <aura:attribute name="name" type="String" default="Welcome!"/>
+    <aura:attribute name="options" type="String[]" default="logout"/>
+    <aura:attribute name="pathPrefix" type="String" required="false" default="success"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <ui:menu >
+        <ui:menuTriggerLink aura:id="menuTrigger" label="{!v.name}"
+                            class="slds-m-left--small slds-grid slds-truncate_container--75">
+            <span class="slds-text-color--inverse slds-truncate">{!v.name}</span>
+            <lightning:icon class="slds-no-flex" iconName="utility:down" size="x-small" variant="inverse"/>
+        </ui:menuTriggerLink>
+        <ui:menuList class="actionMenu" aura:id="actionMenu">
+            <aura:iteration items="{!v.options}" var="itemLabel">
+                <ui:actionMenuItem label="{!itemLabel}" click="{!c.handleClick}"/>
+            </aura:iteration>
+        </ui:menuList>
+    </ui:menu>
+</aura:component>

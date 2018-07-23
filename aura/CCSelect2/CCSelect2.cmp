@@ -1,0 +1,43 @@
+<aura:component controller="CCSelect2Component">
+  <!--First Add jQuery and Select2 plugin library from static resource Using ltng:require tag-->  
+    <ltng:require styles="{! $Resource.select2 + '/select2-4.0.3/dist/css/select2.min.css'}" 
+      scripts="{!join(',', 
+        $Resource.jquery224 ,  
+        $Resource.select2 + '/select2-4.0.3/dist/js/select2.js')
+      }" afterScriptsLoaded="{!c.scriptsLoaded}"/>
+    
+    <!--init handler event call "doInit" function on component load and fetch picklist values-->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <!--Declare Attributes-->
+    <aura:attribute name="errorVisibility" type="Boolean" default="false" />
+    <aura:attribute name="picklistOptsList" type="String[]"/>
+    <aura:attribute name="selectedValues" type="String[]"/>
+
+    <aura:attribute name="selectId" type="String" required="true" default="selectCmp" />
+    <aura:attribute name="obj" type="String" required="true" />
+    <aura:attribute name="fld" type="String" required="true" />
+    <aura:attribute name="label" type="String" required="true" />
+    <aura:attribute name="inputRequired" type="Boolean" default="false" />
+    <aura:method name="getSelectedValues" />
+    <aura:method name="validateInput" />
+
+    <label class="slds-form-element__label">
+        <abbr class="{!v.inputRequired ? 'slds-required visible' : 'slds-required hidden'}" title="required">*</abbr>{!v.label}
+    </label>
+    <div class="slds-form-element__control">
+        <select style="width:100%" id="{!v.selectId}" class="slds-select select2 select2Class" multiple="multiple" 
+                data-error="You must select one or more values" required="true">
+            <aura:iteration items="{!v.picklistOptsList}" var="opts">
+                <option value="{!opts}"> {!opts} </option>
+            </aura:iteration>     
+        </select>
+    </div>
+    <div aura:id="errorDiv" class="{!v.errorVisibility ? 'visible' : 'hidden'}">
+        <ul class="has-error uiInputDefaultError uiInput uiInputDate uiInput--default uiInput--input uiInput--datetime" 
+            data-aura-class="uiInputDefaultError uiInput uiInputDate uiInput--default uiInput--input uiInput--datetime">
+            <li class="form-element__help">You must select one or more {!v.label}</li>
+        </ul>
+    </div>
+
+</aura:component>

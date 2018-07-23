@@ -1,0 +1,3 @@
+<design:component label="Custom Profile Menu">
+    <design:attribute name="pathPrefix" label="Site Prefix" description="Site Prefix" />
+</design:component>

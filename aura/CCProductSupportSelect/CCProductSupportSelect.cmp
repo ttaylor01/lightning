@@ -1,0 +1,68 @@
+<aura:component access="global" extends="c:CCPayerReviewUtility">
+    <c:CCPleaseWait />
+	<c:CCApexBridge aura:id="ApexBridge" debugClient="false" />
+
+    <aura:attribute name="recordId" type="String" default="" />
+    <aura:attribute name="viewSelect" type="String" default="Open" />
+    <aura:attribute name="productSelect" type="String" default="" />
+    <aura:attribute name="otherVisibility" type="Boolean" default="false" />
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:registerEvent name="goToTarget" type="c:CCsObjectEvent"/>
+
+    <!-- GRID -->
+    <div class="slds-grid slds-m-top--large">
+
+        <!-- NARROW COL -->
+        <div class="slds-col slds-p-horizontal--small slds-col--rule-right slds-size--3-of-12">
+            <!-- FIELDSET Case Reason -->
+            <fieldset class="slds-form--compound">
+                <legend class="slds-form-element__label slds-text-title--caps">Please select the Product you need help with today</legend>
+                <div class="slds-form-element__group">
+                    <div class="slds-form-element__row">
+                        <div class="slds-form-element slds-size--1-of-1">
+                            <label class="slds-form-element__label">Product</label>
+                            <div class="slds-form-element__control">
+                                <ui:inputSelect aura:id="product" class="slds-select" value="{!v.productSelect}" change="{!c.onProductChange}" />
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- / GROUP -->
+            </fieldset>
+            <div class="">
+                <a onclick="{!c.backToList}" href="javascript:void(0);" class="slds-text-link--reset"><span class="slds-text-link">&laquo; Back to List</span></a>
+            </div>
+            <!-- / FIELDSET Case Reason -->
+        </div>
+        <!-- / NARROW COL -->
+            
+        <!-- MAIN COL -->
+        <div class="slds-col slds-p-horizontal--small slds-size--9-of-12">
+            <!-- CASE CREATE section -->
+            <div aura:id="caseCreateCmp"></div>
+            <!-- / CASE CREATE section -->
+            <!-- DEFAULT MESSAGE -->
+            <div aura:id="selectProductMessage" class="slds-col slds-m-top--large">
+                <p style="text-align: center;">
+                    <span style="font-family: arial; font-size: 24px; color: rgb(0, 102, 204);">Please select a Product</span>
+                </p>
+            </div>
+            <!-- / DEFAULT MESSAGE -->
+            <!-- STAY TUNED MESSAGE -->
+            <div aura:id="stayTunedMessage" class="slds-col slds-m-top--large hidden">
+                <p style="text-align: center;">
+                    <span style="font-family: arial; font-size: 24px; color: rgb(0, 102, 204);">Stay Tuned...</span>
+                </p>
+                <p style="text-align: center;">
+                    <span style="font-size: 14px;">We are working on new functionality -- coming in 2018</span>
+                </p>
+            </div>
+            <!-- / STAY TUNED MESSAGE -->
+
+        </div>
+        <!-- / MAIN COL -->
+
+    </div>
+    <!-- / GRID -->
+
+</aura:component>
