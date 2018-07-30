@@ -82,5 +82,8 @@
     },
     stopWait : function(component, event, helper) {
         helper.hideSpinner(component, event, helper);
+    },
+    showChangeAlternateContactDialog : function(component, event, helper) {
+        $A.util.removeClass(component.find("changealternatecontactcmp"),'hide-modal');
     }
 })

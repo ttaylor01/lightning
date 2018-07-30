@@ -111,34 +111,26 @@
                 </div>
                 <div class="slds-grid slds-grid--pull-padded">
                     <div aura:id="outputAlternateEmail" class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12">
-                        <button class="slds-button slds-float--right slds-button--icon slds-button--icon-small" title="Edit this Field" onclick="{!c.setEditMode}">
+                        <button aura:id="inputAlternateEmail" class="slds-button slds-float--right slds-button--icon slds-button--icon-small" title="Edit this Field" onclick="{!c.showChangeAlternateContactDialog}">
                             <lightning:icon iconName="utility:edit" size="x-small" alternativeText="Edit" class="slds-button__icon slds-button__icon--hint"/>
                             <span class="slds-assistive-text">Edit this Field</span>
                         </button>
-                        <span class="slds-form-element__label">Alternate Contact Email</span>
+                        <span class="slds-form-element__label">Alternate Contact</span>
                         <div class="slds-form-element__control">
-                            <span class="slds-form-element__static">{!v.cs.Alternate_Email__c}</span>
+                            <span class="slds-form-element__static">{!v.cs.Alternate_Contact__r.Name}</span>
                         </div>
                     </div>
-                    <div aura:id="inputAlternateEmail" class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12 hide-component">
-                        <lightning:input aura:id="alternateemail" type="email" label="Alternate Contact Email" name="alternateemail" value="{!v.cs.Alternate_Email__c}"
-                                         messageWhenTypeMismatch="Please enter a valid email format."/>
-                    </div>
-                    <div aura:id="outputAlternateEmail2" class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12">
-                        <button class="slds-button slds-float--right slds-button--icon slds-button--icon-small" title="Edit this Field" onclick="{!c.setEditMode}">
+                    <div aura:id="outputAlternateEmail" class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12">
+                        <button aura:id="inputAlternateEmail" class="slds-button slds-float--right slds-button--icon slds-button--icon-small" title="Edit this Field" onclick="{!c.showChangeAlternateContactDialog}">
                             <lightning:icon iconName="utility:edit" size="x-small" alternativeText="Edit" class="slds-button__icon slds-button__icon--hint"/>
                             <span class="slds-assistive-text">Edit this Field</span>
                         </button>
-                        <span class="slds-form-element__label">Alternate Contact Email 2</span>
+                        <span class="slds-form-element__label">Alternate Contact 2</span>
                         <div class="slds-form-element__control">
-                            <span class="slds-form-element__static">{!v.cs.Alternate_Email_2__c}</span>
+                            <span class="slds-form-element__static">{!v.cs.Alternate_Contact_2__r.Name}</span>
                         </div>
                     </div>
-                        <div aura:id="inputAlternateEmail2" class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-2 slds-medium-size--3-of-6 slds-large-size--6-of-12 hide-component">
-                            <lightning:input aura:id="alternateemail2" type="email" label="Alternate Contact Email 2" name="alternateemail2" value="{!v.cs.Alternate_Email_2__c}" 
-                                             messageWhenTypeMismatch="Please enter a valid email format."/>
-                        </div>
-                </div>
+                </div>            
             </div>
             <!-- / PANEL BOILERPLATE STUFF -->
 
@@ -147,6 +139,12 @@
                 <div class="slds-panel__section slds-has-divider--bottom">
                     <h2 class="slds-text-heading--small slds-m-bottom--medium">Ticket Reason</h2>
                     <div class="slds-grid slds-grid--pull-padded slds-wrap">
+                        <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
+                            <span class="slds-form-element__label">Priority</span>
+                            <div class="slds-form-element__control">
+                                <span class="slds-form-element__static">{!v.cs.Requestor_Priority__c}</span>
+                            </div>
+                        </div>
                         <div class="slds-form-element slds-hint-parent slds-p-horizontal--small slds-size--1-of-1">
                             <span class="slds-form-element__label">Reason</span>
                             <div class="slds-form-element__control">
