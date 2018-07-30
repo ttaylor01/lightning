@@ -78,12 +78,36 @@
                     <div class="slds-form-element__row">
                         <lightning:input class="slds-size--1-of-1" aura:id="myticketnumber" label="My Tracking Number" name="myticketnumber" value="{!v.cs.Customer_Reference_Number__c}" />
                     </div>
+             <!--   <div class="slds-form-element__row">
+                        
+                            <lightning:input class="slds-size1-of-2" aura:id="alternateemail" type="email" label="Alternate Contact Email" name="alternateemail" value="{!v.cs.Alternate_Email__c}"
+                            messageWhenTypeMismatch="Please enter a valid email format."/>
+                            <lightning:input class="slds-size1-of-2" aura:id="alternateemail2" type="email" label="Alternate Contact Email 2" name="alternateemail2" value="{!v.cs.Alternate_Email_2__c}" 
+                            messageWhenTypeMismatch="Please enter a valid email format."/>  
+
+                   </div>  -->
+                    
                     <div class="slds-form-element__row">
-                        <lightning:input class="slds-size--1-of-2" aura:id="alternateemail" type="email" label="Alternate Contact Email" name="alternateemail" value="{!v.cs.Alternate_Email__c}"
-                                         messageWhenTypeMismatch="Please enter a valid email format."/>
-                        <lightning:input class="slds-size--1-of-2" aura:id="alternateemail2" type="email" label="Alternate Contact Email 2" name="alternateemail2" value="{!v.cs.Alternate_Email_2__c}" 
-                                         messageWhenTypeMismatch="Please enter a valid email format."/>
+                        <c:CCLookupSObject aura:id="lookupAltContactCmp" label="Alternate Contact" pluralLabel="Alternate Contacts" sObjectAPIName="Contact"
+                                           listIconSVGPath="standard:contact"
+                                           listIconClass="slds-icon-standard-contact"
+                                           recordId="{!v.recordId}"
+                                           fieldAPIName="Alternate_Contact__c"
+                                           customFilter="Id IN (Select ContactId FROM User)"
+                                           />
                     </div>
+                    
+                    <div class="slds-form-element__row">
+                        <c:CCLookupSObject aura:id="lookupAltContactCmp" label="Alternate Contact 2" pluralLabel="Alternate Contacts" sObjectAPIName="Contact"
+                                           listIconSVGPath="standard:contact"
+                                           listIconClass="slds-icon-standard-contact"
+                                           recordId="{!v.recordId}"
+                                           fieldAPIName="Alternate_Contact_2__c"
+                                           customFilter="Id IN (Select ContactId FROM User)"
+                                           />
+                    </div>
+                    
+                    
                 </div> <!-- / GROUP -->
             </fieldset>
             <!-- / FIELDSET BOILERPLATE STUFF -->
@@ -92,6 +116,17 @@
             <fieldset class="slds-form--compound slds-has-divider--bottom-space">
                 <legend class="slds-form-element__label slds-text-title--caps">Ticket Reason</legend>
                 <div class="slds-form-element__group">
+                    <div class="slds-form-element__row">
+                        <div class="slds-form-element slds-size--1-of-1">
+                            <label class="slds-form-element__label">Priority</label>                           
+                            <div class="slds-form-element__control">
+                                <ui:inputSelect aura:id="priority" class="slds-select" value="{!v.cs.Requestor_Priority__c}" />
+<!--
+		                        <force:inputField aura:id="reason" value="{!v.cs.Call_Reason__c}" />
+-->
+                            </div>
+                        </div>
+                    </div>
                     <div class="slds-form-element__row">
                         <div class="slds-form-element slds-size--1-of-1">
                             <label class="slds-form-element__label"><abbr class="slds-required" title="required">*</abbr>Reason
@@ -125,7 +160,13 @@
                         </div>
                     </div>
                     </div> <!-- / GROUP -->
+                
+               
+                
+                
             </fieldset>
+       
+            
             <!-- / FIELDSET Case Reason -->
 
             <!-- FIELDSET User Info -->

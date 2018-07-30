@@ -53,7 +53,11 @@
         }
         if(component.get("v.cs.Call_Reason__c") === "Other") {
             component.set("v.otherVisibility",true);
-        } else {
+        } 
+        if(component.get("v.cs.Requestor_Priority__c") === "" || component.get("v.cs.Requestor_Priority__c") === "--- None ---") {
+            this.resetFields(component);
+        }
+        else {
             this.resetFields(component);
         }
     },
@@ -78,7 +82,7 @@
             allValid = allValid && true;
         }
         console.log("validateInput REASON? "+allValid);
-
+        
         inputCmp = component.find("briefdescription");
         inputValue = inputCmp.get("v.value");
         var inputDisabled = inputCmp.get("v.disabled");
@@ -139,10 +143,41 @@
         picklistValues.push({class: "optionClass",label: "Other",value: "Other"});
         component.find("transaction").set("v.options", picklistValues);
     },
+    
+     getRequestorPriorityPicklistValues : function(component, event, helper) {
+        var picklistValues = []; // for store picklist values to set on ui field.
+        picklistValues.push({
+            class: "optionClass",
+            label: "--- None ---",
+            value: ""
+        });
+         var action = component.get("c.getRequestorPriorityValues"); -
+
+         action.setCallback(this, function(response) {
+            if (response.getState() === "SUCCESS") {
+                //store the return response from server (map<string,List<string>>)  
+                var valueResult = response.getReturnValue();
+                
+                 for (var i = 0; i < valueResult.length; i++) {
+                    // alert(valueResult[i]);
+                     if(valueResult[i] !='')
+                    picklistValues.push({
+                        class: "optionClass",
+                        label: valueResult[i],
+                        value: valueResult[i]
+                    });
+                }
+            }
+        component.find("priority").set("v.options", picklistValues);
+         });
+       $A.enqueueAction(action);  
+     },
+                            
     getBriefDescriptionPicklistValues: function(component, controllerField, dependentField) {
+       // alert(controllerField);
         // call the server side function
-        var action = component.get("c.getDependentOptions");
-        // pass parameters [object name , controller field name ,dependent field name] -
+        
+       var action = component.get("c.getDependentOptions"); // pass parameters [object name , controller field name ,dependent field name] -
         // to server side function 
         
         action.setParams({
@@ -155,7 +190,7 @@
             if (response.getState() === "SUCCESS") {
                 //store the return response from server (map<string,List<string>>)  
                 var StoreResponse = response.getReturnValue();
-                
+                //alert(StoreResponse);
                 // once set #StoreResponse to briefDescriptionFieldMap attribute 
                 component.set("v.briefDescriptionFieldMap", StoreResponse);
 
@@ -189,7 +224,14 @@
                     });
                 }
                 // set the ControllerField variable values (controller picklist field)
+                if(controllerField === 'Case_Reason__c'){
+                   // alert('reason');
                 component.find('reason').set("v.options", ControllerField);
+                }
+                 if(controllerField === 'Requestor_Priority__c'){
+                   // alert('test' +ControllerField);
+                    component.find('priority').set("v.options", ControllerField);
+                }
             }
         });
         $A.enqueueAction(action);

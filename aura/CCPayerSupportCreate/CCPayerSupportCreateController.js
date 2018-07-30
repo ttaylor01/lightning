@@ -4,6 +4,7 @@
         helper.getCase(component, event, helper);
         helper.getBriefDescriptionPicklistValues(component, 'Case_Reason__c', 'Case_Brief_Description__c');
         helper.getSubmissionMethodPicklistValues(component, 'Case_Reason__c', 'Case_Submission_Method__c');
+        helper.getRequestorPriorityPicklistValues(component, event, helper);
         helper.getTransactionPicklistValues(component, event, helper);
 	},
     doSave : function(component, event, helper) {
@@ -117,5 +118,5 @@
         // Handle change in field visibility
         helper.toggleVisibility(component);
     },
-
+    
 })
