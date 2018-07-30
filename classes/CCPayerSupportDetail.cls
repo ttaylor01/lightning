@@ -22,7 +22,7 @@ public with sharing class CCPayerSupportDetail {
 					Address__c, City__c, State__c, Zip_Code__c, Payer_States__c, New_Payer_Transaction__c, Estimated_Monthly_Volume__c, 
 					Subject, Description, CID_Identifier__c, ContactId, Contact.Name, Status, RecordTypeId, ClosedDate,
 					Payer_Ticket_Number__c, Secondary_Ticket_Number__c, Source__c, Owner.Name,
-					Transaction__c
+					Transaction__c, Requestor_Priority__c 
 					FROM Case
 					WHERE Id = :recordId
 					LIMIT 1
@@ -195,6 +195,18 @@ public with sharing class CCPayerSupportDetail {
 
         return objResults;
     }
+    
+    @AuraEnabled
+    	public static List<String> getRequestorPriorityValues() {
+		List<String> pickListValuesList= new List<String>();
+		Schema.DescribeFieldResult fieldResult = Case.Requestor_Priority__c.getDescribe();
+		List<Schema.PicklistEntry> ple = fieldResult.getPicklistValues();
+		pickListValuesList.add('');
+		for( Schema.PicklistEntry pickListVal : ple) {
+			pickListValuesList.add(pickListVal.getLabel());
+		}
+		return pickListValuesList;
+	}
 /*
 	@AuraEnabled
 	public static List<String> getTransactionValues() {

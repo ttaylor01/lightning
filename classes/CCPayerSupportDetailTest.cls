@@ -11,6 +11,7 @@ private class CCPayerSupportDetailTest {
 			Map<String,List<String>> myMap = CCPayerSupportDetail.getDependentOptions('Case', 'Case_Reason__c', 'Case_Submission_Method__c');
 			myMap = CCPayerSupportDetail.getDependentOptions('Case', 'Case_Reason__c', 'Case_Brief_Description__c');
 			myMap = CCPayerSupportDetail.getDependentOptions('Case', 'Case_Brief_Description__c', 'Case_Brief_Description_Detail__c');
+			List<String> priorityList =  CCPayerSupportDetail.getRequestorPriorityValues();
 
 			Case cs = CCPayerSupportDetail.getCase('');
             cs.Subject = 'new case';
