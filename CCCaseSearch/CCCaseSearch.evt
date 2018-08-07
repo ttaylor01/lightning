@@ -1,4 +1,0 @@
-<aura:event type="COMPONENT" 
-            description="Raise when user submits form to search cases">
-    <aura:attribute name="formData" type="Object"/>
-</aura:event>
